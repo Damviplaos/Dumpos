@@ -71,19 +71,28 @@ export default function LoginPage() {
       toast.success(t('login.loginSuccess'));
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('id, username')
+        .select('id, username, store_id')
         .eq('username', data.username)
         .maybeSingle();
       if (profileData) {
-        await supabase.from('audit_logs').insert({
-          user_id: profileData.id,
-          username: profileData.username,
-          action: 'login',
-          entity_type: 'auth',
-          entity_id: null,
-          details: {},
-          severity: 'info',
-        });
+        await Promise.all([
+          supabase.from('audit_logs').insert({
+            user_id: profileData.id,
+            username: profileData.username,
+            action: 'login',
+            entity_type: 'auth',
+            entity_id: null,
+            details: {},
+            severity: 'info',
+          }),
+          // บันทึกเวลาเข้างาน
+          supabase.from('attendance_logs').insert({
+            user_id: profileData.id,
+            username: profileData.username,
+            store_id: profileData.store_id ?? null,
+            clock_in_at: new Date().toISOString(),
+          }),
+        ]);
       }
       navigate('/');
     }

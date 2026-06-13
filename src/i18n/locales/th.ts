@@ -90,6 +90,7 @@ const th = {
     settings: 'ตั้งค่า',
     superAdmin: 'Super Admin',
     logout: 'ออกจากระบบ',
+    clockOut: 'เลิกงาน',
     store: 'ร้าน',
   },
 
@@ -384,6 +385,7 @@ const th = {
   // ============ ยศและสิทธิ์ ============
   roles: {
     title: 'จัดการยศและสิทธิ์',
+    subtitle: 'กำหนดว่าพนักงานแต่ละยศทำอะไรได้บ้าง',
     addRole: 'สร้างยศใหม่',
     editRole: 'แก้ไขยศ',
     deleteRole: 'ลบยศ',
@@ -613,6 +615,20 @@ const th = {
     admin: 'ผู้ดูแลระบบ',
     cashier: 'แคชเชียร์',
     custom: 'กำหนดเอง',
+  },
+
+  // ============ การเข้า-ออกงาน ============
+  attendance: {
+    clockIn: 'เข้างาน',
+    clockOut: 'เลิกงาน',
+    clockInSuccess: 'บันทึกเวลาเข้างานแล้ว',
+    clockOutSuccess: 'บันทึกเวลาออกงานแล้ว',
+    workLog: 'ประวัติการทำงาน',
+    date: 'วันที่',
+    clockInTime: 'เวลาเข้างาน',
+    clockOutTime: 'เวลาออกงาน',
+    duration: 'ระยะเวลา',
+    noRecord: 'ไม่มีข้อมูลการเข้างาน',
   },
 };
 

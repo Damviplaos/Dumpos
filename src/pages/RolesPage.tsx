@@ -258,11 +258,11 @@ export default function RolesPage() {
             <UserCog className="w-5 h-5 text-primary" />
             จัดการยศและสิทธิ์
           </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">กำหนดว่าพนักงานแต่ละยศทำอะไรได้บ้าง</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{t('roles.subtitle', 'กำหนดว่าพนักงานแต่ละยศทำอะไรได้บ้าง')}</p>
         </div>
         <Button onClick={() => openCreate()} className="shrink-0">
           <Plus className="w-4 h-4 mr-2" />
-          สร้างยศใหม่
+          {t('roles.addRole')}
         </Button>
       </div>
 
@@ -417,7 +417,7 @@ export default function RolesPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              {editingRole ? 'แก้ไขยศ' : 'สร้างยศใหม่'}
+              {editingRole ? t('roles.editRole') : t('roles.addRole')}
             </DialogTitle>
           </DialogHeader>
 
@@ -426,7 +426,7 @@ export default function RolesPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ชื่อยศ</FormLabel>
+                    <FormLabel>{t('roles.roleName')}</FormLabel>
                     <FormControl>
                       <Input placeholder="เช่น หัวหน้าแคชเชียร์" {...field} disabled={editingRole?.is_system} />
                     </FormControl>
@@ -569,9 +569,9 @@ export default function RolesPage() {
       <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
         <AlertDialogContent className="max-w-[calc(100%-2rem)] md:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>ยืนยันลบยศ</AlertDialogTitle>
+            <AlertDialogTitle>{t('roles.deleteConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
-              คุณต้องการลบยศ <strong>{deleteTarget?.name}</strong> ใช่หรือไม่?
+              {t('roles.deleteRole')}: <strong>{deleteTarget?.name}</strong>
               {(userCounts[deleteTarget?.id || ''] || 0) > 0 && (
                 <span className="block mt-2 text-destructive">
                   ⚠️ มีพนักงาน {userCounts[deleteTarget?.id || '']} คนที่ใช้ยศนี้อยู่
@@ -580,9 +580,9 @@ export default function RolesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-              ลบยศ
+              {t('roles.deleteRole')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

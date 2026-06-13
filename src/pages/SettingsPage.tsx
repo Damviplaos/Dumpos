@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Save, Store, Phone, MapPin, Receipt, Bell, Percent, Plus, Pencil, Trash2,
-  Send, Bot, CheckCircle, XCircle, AlertTriangle, Link2, Copy, Tag,
+  Send, Bot, CheckCircle, XCircle, AlertTriangle, Link2, Copy, Tag, Image, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -74,10 +74,12 @@ const PRESET_EMOJIS = ['🏷️', '⭐', '🔥', '💎', '🚀', '👑', '🎖�
 
 export default function SettingsPage() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const { profile, refreshStoreSettings } = useAuth();
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [savingTelegram, setSavingTelegram] = useState(false);
   const [testingTelegram, setTestingTelegram] = useState(false);
   const [registeringWebhook, setRegisteringWebhook] = useState(false);
@@ -168,10 +170,40 @@ export default function SettingsPage() {
     const { error } = settings?.id
       ? await supabase.from('store_settings').update(payload).eq('id', settings.id)
       : await supabase.from('store_settings').insert(payload);
+    // อัปเดตชื่อร้านใน stores table ด้วย
+    if (!error && profile?.store_id) {
+      await supabase.from('stores').update({ name: data.store_name }).eq('id', profile.store_id);
+    }
     setSavingSettings(false);
     if (error) { toast.error(t('common.error')); return; }
     toast.success(t('settings.saveSuccess'));
-    loadSettings();
+    await loadSettings();
+    refreshStoreSettings();
+  };
+
+  const onUploadLogo = async (file: File) => {
+    if (!settings?.id) { toast.error(t('settings.saveFirst')); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error('ไฟล์ต้องมีขนาดไม่เกิน 2MB'); return; }
+    setUploadingLogo(true);
+    const ext = file.name.split('.').pop();
+    const path = `logos/${settings.id}.${ext}`;
+    const { error: upErr } = await supabase.storage.from('logos').upload(path, file, { upsert: true });
+    if (upErr) { toast.error(t('settings.logoUploadFail')); setUploadingLogo(false); return; }
+    const { data: urlData } = supabase.storage.from('logos').getPublicUrl(path);
+    const publicUrl = urlData?.publicUrl + `?t=${Date.now()}`;
+    await supabase.from('store_settings').update({ logo_url: publicUrl }).eq('id', settings.id);
+    setUploadingLogo(false);
+    toast.success(t('settings.logoUploaded'));
+    await loadSettings();
+    refreshStoreSettings();
+  };
+
+  const onRemoveLogo = async () => {
+    if (!settings?.id) return;
+    await supabase.from('store_settings').update({ logo_url: null }).eq('id', settings.id);
+    toast.success(t('settings.removeLogo'));
+    await loadSettings();
+    refreshStoreSettings();
   };
 
   const onSaveTelegram = async (data: TelegramForm) => {
@@ -321,31 +353,76 @@ export default function SettingsPage() {
                     <FormMessage />
                   </FormItem>
                 )} />
+
+                {/* Logo Upload */}
+                <div className="space-y-2">
+                  <label className="text-sm font-normal flex items-center gap-1.5 text-foreground">
+                    <Image className="w-3.5 h-3.5" />{t('settings.storeLogo')}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {settings?.logo_url ? (
+                      <div className="relative w-16 h-16 rounded-lg border border-border overflow-hidden shrink-0">
+                        <img src={settings.logo_url} alt="logo" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={onRemoveLogo}
+                          className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0">
+                        <Image className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={e => { const f = e.target.files?.[0]; if (f) onUploadLogo(f); e.target.value = ''; }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingLogo || !settings?.id}
+                        onClick={() => logoInputRef.current?.click()}
+                      >
+                        {uploadingLogo ? t('settings.uploadingLogo') : t('settings.uploadLogo')}
+                      </Button>
+                      <p className="text-xs text-muted-foreground">{t('settings.logoHint')}</p>
+                    </div>
+                  </div>
+                </div>
+
                 <FormField control={settingsForm.control} name="address" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />ที่อยู่</FormLabel>
-                    <FormControl><Input {...field} placeholder="123 ถนน..." /></FormControl>
+                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{t('settings.address')}</FormLabel>
+                    <FormControl><Input {...field} placeholder={t('settings.addressPlaceholder')} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={settingsForm.control} name="phone" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />เบอร์โทรศัพท์</FormLabel>
-                    <FormControl><Input {...field} placeholder="02-xxx-xxxx" /></FormControl>
+                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />{t('settings.phone')}</FormLabel>
+                    <FormControl><Input {...field} placeholder={t('settings.phonePlaceholder')} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <Separator />
                 <FormField control={settingsForm.control} name="tax_rate" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Percent className="w-3.5 h-3.5" />ภาษี VAT (%)</FormLabel>
+                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Percent className="w-3.5 h-3.5" />{t('settings.taxRate')}</FormLabel>
                     <FormControl><Input {...field} type="number" min={0} max={100} step="0.01" className="w-32" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={settingsForm.control} name="low_stock_threshold" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Bell className="w-3.5 h-3.5" />สต็อกขั้นต่ำสำหรับแจ้งเตือน</FormLabel>
+                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Bell className="w-3.5 h-3.5" />{t('settings.lowStockThreshold')}</FormLabel>
                     <FormControl><Input {...field} type="number" min={1} className="w-32" /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -353,7 +430,7 @@ export default function SettingsPage() {
                 <FormField control={settingsForm.control} name="max_void_per_day" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-normal flex items-center gap-1.5">
-                      <AlertTriangle className="w-3.5 h-3.5 text-yellow-600" />จำนวนยกเลิกบิลสูงสุด/วัน
+                      <AlertTriangle className="w-3.5 h-3.5 text-yellow-600" />{t('settings.maxVoidPerDay')}
                     </FormLabel>
                     <FormControl><Input {...field} type="number" min={1} max={999} className="w-32" /></FormControl>
                     <FormMessage />
@@ -362,8 +439,8 @@ export default function SettingsPage() {
                 <FormField control={settingsForm.control} name="auto_print_receipt" render={({ field }) => (
                   <FormItem className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
                     <div>
-                      <FormLabel className="text-sm font-normal flex items-center gap-1.5 cursor-pointer"><Receipt className="w-3.5 h-3.5" />พิมพ์ใบเสร็จอัตโนมัติ</FormLabel>
-                      <p className="text-xs text-muted-foreground mt-0.5">เปิดหน้าต่างพิมพ์ทันทีหลังชำระเงิน</p>
+                      <FormLabel className="text-sm font-normal flex items-center gap-1.5 cursor-pointer"><Receipt className="w-3.5 h-3.5" />{t('settings.autoPrintReceipt')}</FormLabel>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t('settings.autoPrintReceiptDesc')}</p>
                     </div>
                     <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                   </FormItem>
@@ -650,8 +727,8 @@ export default function SettingsPage() {
               </div>
               <FormField control={badgeForm.control} name="description" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-normal">คำอธิบาย</FormLabel>
-                  <FormControl><Input {...field} placeholder="คำอธิบาย Badge นี้" /></FormControl>
+                  <FormLabel className="text-sm font-normal">{t('common.description')}</FormLabel>
+                  <FormControl><Input {...field} placeholder={t('settings.badgeDesc')} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -686,8 +763,8 @@ export default function SettingsPage() {
               )} />
               <FormField control={catForm.control} name="description" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-normal">คำอธิบาย</FormLabel>
-                  <FormControl><Input {...field} placeholder="คำอธิบายเพิ่มเติม" /></FormControl>
+                  <FormLabel className="text-sm font-normal">{t('common.description')}</FormLabel>
+                  <FormControl><Input {...field} placeholder={t('common.description')} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

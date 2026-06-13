@@ -7,10 +7,11 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/db/supabase';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -47,14 +48,43 @@ interface SidebarContentProps {
 }
 
 function SidebarContent({ onClose }: SidebarContentProps) {
-  const { profile, store, isAdmin, isSuperAdmin, can, signOut } = useAuth();
+  const { profile, storeSettings, isAdmin, isSuperAdmin, can, signOut } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleSignOut = async () => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    // บันทึกเวลาออกงาน
+    if (profile?.id) {
+      await supabase
+        .from('attendance_logs')
+        .update({ clock_out_at: now.toISOString() })
+        .eq('user_id', profile.id)
+        .is('clock_out_at', null)
+        .order('clock_in_at', { ascending: false })
+        .limit(1);
+    }
+
+    // แจ้งเตือน Telegram เมื่อเลิกงาน
+    if (storeSettings?.telegram_bot_token && storeSettings?.telegram_chat_id) {
+      const name = profile?.full_name || profile?.username || 'พนักงาน';
+      const msg = `🕐 *เลิกงาน*\n👤 ${name}\n📅 ${dateStr}\n🕐 เวลา ${timeStr}`;
+      supabase.functions.invoke('send-telegram', {
+        body: {
+          bot_token: storeSettings.telegram_bot_token,
+          chat_id: storeSettings.telegram_chat_id,
+          message: msg,
+          with_menu: false,
+        },
+      }).catch(() => {/* ไม่บล็อก logout หากส่งไม่ได้ */});
+    }
+
     await signOut();
-    toast.success(t('nav.logout'));
+    toast.success(t('nav.clockOut'));
     navigate('/login');
     onClose?.();
   };
@@ -86,13 +116,22 @@ function SidebarContent({ onClose }: SidebarContentProps) {
 
   return (
     <div className="flex flex-col h-full bg-sidebar">
+      {/* Store header with logo */}
       <div className="flex items-center gap-3 px-4 py-5">
-        <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
-          <ShoppingBag className="w-5 h-5 text-sidebar-primary-foreground" />
+        <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden">
+          {storeSettings?.logo_url ? (
+            <img
+              src={storeSettings.logo_url}
+              alt="โลโก้ร้าน"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <ShoppingBag className="w-5 h-5 text-sidebar-primary-foreground" />
+          )}
         </div>
         <div className="min-w-0">
           <p className="text-sidebar-foreground font-semibold text-sm truncate">
-            {isSuperAdmin ? 'POS System' : (store?.name || 'ระบบ POS')}
+            {isSuperAdmin ? 'POS System' : (storeSettings?.store_name || 'ระบบ POS')}
           </p>
           <p className="text-sidebar-foreground/60 text-xs truncate">Point of Sale</p>
         </div>
@@ -150,12 +189,13 @@ function SidebarContent({ onClose }: SidebarContentProps) {
             </div>
           </div>
           <Button
-            variant="ghost" size="icon"
+            variant="ghost"
             onClick={handleSignOut}
-            className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground w-8 h-8"
-            title={t('nav.logout')}
+            className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 px-2 gap-1.5 text-xs"
+            title={t('nav.clockOut')}
           >
             <LogOut className="w-4 h-4" />
+            <span className="hidden md:inline">{t('nav.clockOut')}</span>
           </Button>
         </div>
       </div>
@@ -185,7 +225,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-      <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border">
+      <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border sticky top-0 h-screen overflow-y-auto">
         <SidebarContent />
       </aside>
 

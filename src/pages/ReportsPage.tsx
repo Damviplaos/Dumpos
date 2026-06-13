@@ -15,6 +15,7 @@ import {
 import { supabase } from '@/db/supabase';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { sendScreenshotToTelegram } from '@/hooks/useTelegramScreenshot';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SalesSummary {
   totalSales: number;
@@ -93,6 +94,8 @@ function buildChartData(txArr: any[], from: string, to: string): ChartPoint[] {
 
 export default function ReportsPage() {
   const { t } = useTranslation();
+  const { can } = useAuth();
+  const canViewProfit = can('view_profit');
   const [preset, setPreset] = useState<PresetKey>('week');
 
   const PRESETS: { key: PresetKey; label: string }[] = [
@@ -167,8 +170,10 @@ export default function ReportsPage() {
   const statCards = [
     { title: t('reports.totalSales'), value: summary ? formatCurrency(summary.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
     { title: t('reports.totalOrders'), value: summary ? `${summary.totalOrders} ${t('common.items')}` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
-    { title: t('reports.totalProfit'), value: summary ? formatCurrency(summary.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
-    { title: t('reports.profitMargin'), value: summary ? `${summary.profitMargin.toFixed(1)}%` : '-', icon: TrendingDown, color: 'text-warning', bg: 'bg-warning/10' },
+    ...(canViewProfit ? [
+      { title: t('reports.totalProfit'), value: summary ? formatCurrency(summary.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
+      { title: t('reports.profitMargin'), value: summary ? `${summary.profitMargin.toFixed(1)}%` : '-', icon: TrendingDown, color: 'text-warning', bg: 'bg-warning/10' },
+    ] : []),
     { title: t('dashboard.avgOrderValue'), value: summary ? formatCurrency(summary.avgOrderValue) : '-', icon: CalendarDays, color: 'text-chart-4', bg: 'bg-chart-4/10' },
   ];
 
@@ -280,7 +285,9 @@ export default function ReportsPage() {
                     />
                     <Legend layout="horizontal" wrapperStyle={{ paddingTop: 8 }} />
                   <Bar dataKey="sales" name={t('dashboard.sales')} fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="profit" name={t('dashboard.profit')} fill="hsl(var(--chart-2))" radius={[3, 3, 0, 0]} />
+                  {canViewProfit && (
+                    <Bar dataKey="profit" name={t('dashboard.profit')} fill="hsl(var(--chart-2))" radius={[3, 3, 0, 0]} />
+                  )}
                   </BarChart>
                 </ResponsiveContainer>
               </div>

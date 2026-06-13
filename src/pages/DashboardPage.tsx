@@ -15,6 +15,7 @@ import {
 import { supabase } from '@/db/supabase';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { sendScreenshotToTelegram } from '@/hooks/useTelegramScreenshot';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Transaction, Product } from '@/types/types';
 
 interface DashboardStats {
@@ -54,6 +55,8 @@ function getPresetRange(key: PresetKey): { from: string; to: string } {
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+  const { can } = useAuth();
+  const canViewProfit = can('view_profit');
   const [preset, setPreset] = useState<PresetKey>('today');
 
   const PRESETS: { key: PresetKey; label: string }[] = [
@@ -146,7 +149,7 @@ export default function DashboardPage() {
   const statCards = [
     { title: t('dashboard.totalSales'), value: stats ? formatCurrency(stats.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
     { title: t('dashboard.totalOrders'), value: stats ? `${stats.totalOrders} ${t('common.items')}` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
-    { title: t('dashboard.totalProfit'), value: stats ? formatCurrency(stats.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
+    ...(canViewProfit ? [{ title: t('dashboard.totalProfit'), value: stats ? formatCurrency(stats.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' }] : []),
     { title: t('dashboard.lowStock'), value: stats ? `${stats.lowStockCount} ${t('common.items')}` : '-', icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10' },
   ];
 

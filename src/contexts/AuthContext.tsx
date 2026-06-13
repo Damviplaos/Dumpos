@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { supabase } from '@/db/supabase';
 import type { User } from '@supabase/supabase-js';
-import type { PermissionKey, Permissions, Profile, Store } from '@/types/types';
+import type { PermissionKey, Permissions, Profile, Store, StoreSettings } from '@/types/types';
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
@@ -20,6 +20,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   store: Store | null;
+  storeSettings: Pick<StoreSettings, 'store_name' | 'logo_url' | 'telegram_bot_token' | 'telegram_chat_id'> | null;
   permissions: Permissions;
   loading: boolean;
   isAdmin: boolean;
@@ -30,6 +31,7 @@ interface AuthContextType {
   signUpWithUsername: (username: string, password: string, fullName?: string, storeId?: string, role?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  refreshStoreSettings: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,10 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [store, setStore] = useState<Store | null>(null);
+  const [storeSettings, setStoreSettings] = useState<Pick<StoreSettings, 'store_name' | 'logo_url' | 'telegram_bot_token' | 'telegram_chat_id'> | null>(null);
   const [permissions, setPermissions] = useState<Permissions>({});
   const [loading, setLoading] = useState(true);
 
-  /** โหลดข้อมูลร้านใน background — ไม่บล็อก loading */
+  /** โหลดข้อมูลร้านใน background */
   const loadStore = useCallback(async (storeId: string | null | undefined) => {
     if (!storeId) { setStore(null); return; }
     const { data } = await supabase
@@ -71,16 +74,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStore(data ?? null);
   }, []);
 
+  /** โหลด store_settings สำหรับแสดงชื่อร้าน + โลโก้ใน sidebar */
+  const refreshStoreSettings = useCallback(async () => {
+    const { data } = await supabase
+      .from('store_settings')
+      .select('store_name, logo_url, telegram_bot_token, telegram_chat_id')
+      .maybeSingle();
+    setStoreSettings(data ?? null);
+  }, []);
+
   const applyProfile = useCallback((p: Profile | null) => {
     setProfile(p);
     setPermissions(resolvePermissions(p));
-    // โหลดร้านแบบ background (ไม่ await ที่นี่)
     if (p?.store_id && p.role !== 'super_admin') {
       loadStore(p.store_id);
+      refreshStoreSettings();
     } else {
       setStore(null);
+      setStoreSettings(null);
     }
-  }, [loadStore]);
+  }, [loadStore, refreshStoreSettings]);
 
   const refreshProfile = useCallback(async () => {
     if (!user) { applyProfile(null); return; }
@@ -215,9 +228,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, profile, store, permissions, loading,
+      user, profile, store, storeSettings, permissions, loading,
       isAdmin, isStoreOwner, isSuperAdmin,
-      can, signInWithUsername, signUpWithUsername, signOut, refreshProfile,
+      can, signInWithUsername, signUpWithUsername, signOut, refreshProfile, refreshStoreSettings,
     }}>
       {children}
     </AuthContext.Provider>
@@ -231,13 +244,14 @@ export function useAuth() {
     // instead of throwing — prevents crash when component is briefly
     // rendered outside the provider tree during hot reload.
     return {
-      user: null, profile: null, store: null, permissions: {},
+      user: null, profile: null, store: null, storeSettings: null, permissions: {},
       loading: true, isAdmin: false, isStoreOwner: false, isSuperAdmin: false,
       can: () => false,
       signInWithUsername: async () => ({ error: new Error('No AuthProvider') }),
       signUpWithUsername: async () => ({ error: new Error('No AuthProvider') }),
       signOut: async () => {},
       refreshProfile: async () => {},
+      refreshStoreSettings: async () => {},
     } as AuthContextType;
   }
   return context;
