@@ -89,22 +89,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, applyProfile]);
 
   useEffect(() => {
-    // โหลด session ครั้งแรก — set loading=false ทันทีที่ profile พร้อม
-    supabase.auth.getSession()
-      .then(async ({ data: { session } }) => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const p = await getProfile(session.user.id);
-          applyProfile(p);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-
-    // onAuthStateChange จะยิง INITIAL_SESSION ซ้ำ — ข้ามรอบแรก
+    // ใช้ onAuthStateChange เป็น single source of truth
+    // INITIAL_SESSION จะยิงทันทีพร้อม session จริง (รวมถึงกรณี token หมดอายุ)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // ข้าม INITIAL_SESSION เพราะ getSession จัดการแล้ว
-      if (event === 'INITIAL_SESSION') return;
+      if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
+        // token หมดอายุ หรือ logout — ล้าง state และกลับหน้า login
+        setUser(null);
+        applyProfile(null);
+        setLoading(false);
+        return;
+      }
       setUser(session?.user ?? null);
       if (session?.user) {
         const p = await getProfile(session.user.id);
@@ -112,9 +106,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         applyProfile(null);
       }
+      // loading=false หลังจาก INITIAL_SESSION หรือ SIGNED_IN ประมวลผลเสร็จ
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    // fallback: ถ้า INITIAL_SESSION ไม่ยิงภายใน 5 วินาที ให้ยกเลิก loading
+    const fallback = setTimeout(() => setLoading(false), 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallback);
+    };
   }, [applyProfile]);
 
   const signInWithUsername = async (username: string, password: string) => {

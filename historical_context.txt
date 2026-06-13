@@ -1,1265 +1,4 @@
-ace
-Old String: ```
-                  <TableCell colSpan={7} className="text-center py-10 text-muted-foreground text-sm">
-                    {t('common.noItems')}
-                  </TableCell>
-```
-New String: ```
-                  <TableCell colSpan={7} className="text-center py-10 text-muted-foreground text-sm">
-                    {t('common.noData')}
-                  </TableCell>
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-                      <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => loadTxDetail(tx)} title={t('common.viewDetail')}>
-```
-New String: ```
-                      <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => loadTxDetail(tx)} title={t('common.view') as string}>
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-                          title={t('transactions.voidOrder')}
-```
-New String: ```
-                          title={t('transactions.voidTransaction') as string}
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-        <span>{t('common.showing', { from: page * PAGE_SIZE + 1, to: Math.min((page + 1) * PAGE_SIZE, total), total })}</span>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 0}>{t('common.prev')}</Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>{t('common.next')}</Button>
-```
-New String: ```
-        <span>{page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} / {total}</span>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 0}>{t('common.previous')}</Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>{t('common.next')}</Button>
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-            <DialogTitle>{t('transactions.detailTitle')} {selectedTx?.order_number}</DialogTitle>
-```
-New String: ```
-            <DialogTitle>{t('transactions.transactionDetail')} {selectedTx?.order_number}</DialogTitle>
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-                <div><p className="text-muted-foreground">{t('common.status')}</p>{statusBadge(selectedTx.status)}</div>
-              </div>
-              <Separator />
-              <div>
-                <p className="font-semibold text-foreground mb-2">{t('transactions.items')}</p>
-```
-New String: ```
-                <div><p className="text-muted-foreground">{t('common.status')}</p>{statusBadge(selectedTx.status)}</div>
-              </div>
-              <Separator />
-              <div>
-                <p className="font-semibold text-foreground mb-2">{t('transactions.transactionItems')}</p>
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-              {t('transactions.confirmVoid')}
-```
-New String: ```
-              {t('transactions.voidConfirm')}
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-                  isAdmin ? (
-                    <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-warning font-medium">
-                      {t('transactions.voidWarningAdmin')}
-                    </div>
-                  ) : (
-                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-destructive font-medium">
-                      {t('transactions.voidBlockedCashier')}
-                    </div>
-                  )
-                ) : (
-                  <p>{t('transactions.voidConfirmMsg', { order: voidTx?.order_number })}</p>
-                )}
-```
-New String: ```
-                  isAdmin ? (
-                    <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-warning font-medium">
-                      {t('transactions.voidWarningAdmin')}
-                    </div>
-                  ) : (
-                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-destructive font-medium">
-                      {t('transactions.voidBlockedCashier')}
-                    </div>
-                  )
-                ) : (
-                  <p>{t('transactions.voidConfirmBody')} <strong className="text-foreground">{voidTx?.order_number}</strong></p>
-                )}
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-                  <label className="text-sm font-medium text-foreground block mb-1.5">
-                    {t('transactions.voidReason')} <span className="text-destructive">*</span>
-                  </label>
-                  <Textarea
-                    value={voidReason}
-                    onChange={e => setVoidReason(e.target.value)}
-                    placeholder={t('transactions.voidReasonPlaceholder')}
-```
-New String: ```
-                  <label className="text-sm font-medium text-foreground block mb-1.5">
-                    {t('transactions.voidReason')} <span className="text-destructive">*</span>
-                  </label>
-                  <Textarea
-                    value={voidReason}
-                    onChange={e => setVoidReason(e.target.value)}
-                    placeholder={t('transactions.voidReasonPlaceholder') as string}
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-            <AlertDialogCancel disabled={voidLoading}>{t('common.cancel')}</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={handleVoid}
-              disabled={!voidReason.trim() || voidLoading}
-              className="gap-1.5"
-            >
-              <RotateCcw className="w-4 h-4" />
-              {voidLoading ? t('common.processing') : t('transactions.confirmVoidBtn')}
-```
-New String: ```
-            <AlertDialogCancel disabled={voidLoading}>{t('common.cancel')}</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={handleVoid}
-              disabled={!voidReason.trim() || voidLoading}
-              className="gap-1.5"
-            >
-              <RotateCcw className="w-4 h-4" />
-              {voidLoading ? t('common.loading') : t('transactions.voidConfirm')}
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-    toast.success(`${t('transactions.voided')} ${voidTx.order_number}`);
-```
-New String: ```
-    toast.success(`${t('transactions.voidSuccess')} ${voidTx.order_number}`);
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-    if (error) {
-      toast.error('เกิดข้อผิดพลาด: ' + error.message);
-      return;
-    }
-```
-New String: ```
-    if (error) {
-      toast.error(`${t('common.error')}: ${error.message}`);
-      return;
-    }
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-    if (result.blocked) {
-      // Fraud detected — completed bill tamper attempt
-      toast.error('🚨 ถูกบล็อก: ' + result.error, { duration: 6000 });
-      toast.warning('⚠️ ระบบบันทึกการพยายามยักยอกทรัพย์แล้ว กรุณาตรวจสอบ Fraud Monitor', { duration: 8000 });
-```
-New String: ```
-    if (result.blocked) {
-      // Fraud detected — completed bill tamper attempt
-      toast.error(`🚨 ${t('transactions.blocked')}: ${result.error}`, { duration: 6000 });
-      toast.warning(`⚠️ ${t('transactions.tamperingLogged')}`, { duration: 8000 });
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**FileEditAction**
-Path: [/workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx]
-Thought: 
-Command: str_replace
-Old String: ```
-    if (!result.success) {
-      toast.error(result.error || 'ยกเลิกรายการไม่สำเร็จ');
-      return;
-    }
-```
-New String: ```
-    if (!result.success) {
-      toast.error(result.error || t('transactions.voidFailed') as string);
-      return;
-    }
-```
-
-</action>
-<observation>
-The file /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx has been edited.
-
-</observation>
-<action>
-**CmdRunAction (source=EventSource.AGENT, is_input=False)**
-COMMAND:
-grep -n "t('" /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx | head -60
-</action>
-<observation>
-**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
-  "exit_code": 0,
-  "pid": -1,
-  "username": null,
-  "hostname": null,
-  "working_dir": "/workspace/app-ca8n8duf25mp",
-  "py_interpreter_path": null,
-  "prefix": "",
-  "suffix": "\n[The command completed with exit code 0.]"
-})**
---BEGIN AGENT OBSERVATION--
-51:      .select('*, cashier:profiles(username, full_name)', { count: 'exact' })
-69:      .select('*, items:transaction_items(*), cashier:profiles(username, full_name)')
-89:      toast.error(`${t('common.error')}: ${error.message}`);
-97:      toast.error(`🚨 ${t('transactions.blocked')}: ${result.error}`, { duration: 6000 });
-98:      toast.warning(`⚠️ ${t('transactions.tamperingLogged')}`, { duration: 8000 });
-105:      toast.error(result.error || t('transactions.voidFailed') as string);
-110:    const { data: items } = await supabase.from('transaction_items').select('*').eq('transaction_id', voidTx.id);
-114:        const { data: prod } = await supabase.from('products').select('stock').eq('id', item.product_id).maybeSingle();
-140:    toast.success(`${t('transactions.voidSuccess')} ${voidTx.order_number}`);
-153:      completed: { label: t('transactions.statusCompleted'), cls: 'bg-success/10 text-success' },
-154:      voided: { label: t('transactions.statusVoided'), cls: 'bg-destructive/10 text-destructive' },
-155:      refunded: { label: t('transactions.statusRefunded'), cls: 'bg-warning/10 text-warning' },
-162:    cash: t('transactions.cash'),
-163:    card: t('transactions.card'),
-172:        <h2 className="text-xl font-bold text-foreground text-balance">{t('transactions.title')}</h2>
-173:        <p className="text-sm text-muted-foreground mt-0.5">{t('transactions.totalCount')} {total}</p>
-183:            placeholder={t('transactions.searchPlaceholder') as string}
-194:            <SelectValue placeholder={t('transactions.allStatus')} />
-197:            <SelectItem value="all">{t('transactions.allStatus')}</SelectItem>
-198:            <SelectItem value="completed">{t('transactions.completed')}</SelectItem>
-199:            <SelectItem value="voided">{t('transactions.voided')}</SelectItem>
-200:            <SelectItem value="refunded">{t('transactions.refunded')}</SelectItem>
-205:            <SelectValue placeholder={t('transactions.allPayment')} />
-208:            <SelectItem value="all">{t('transactions.allPayment')}</SelectItem>
-209:            <SelectItem value="cash">{t('transactions.cash')}</SelectItem>
-210:            <SelectItem value="card">{t('transactions.card')}</SelectItem>
-221:                <TableHead className="whitespace-nowrap">{t('transactions.orderNumber')}</TableHead>
-222:                <TableHead className="whitespace-nowrap">{t('transactions.dateTime')}</TableHead>
-223:                <TableHead className="whitespace-nowrap">{t('transactions.cashier')}</TableHead>
-224:                <TableHead className="whitespace-nowrap text-center">{t('transactions.paymentMethod')}</TableHead>
-225:                <TableHead className="whitespace-nowrap text-right">{t('common.total')}</TableHead>
-226:                <TableHead className="whitespace-nowrap text-center">{t('common.status')}</TableHead>
-227:                <TableHead className="whitespace-nowrap text-right">{t('common.actions')}</TableHead>
-242:                    {t('common.noData')}
-257:                      <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => loadTxDetail(tx)} title={t('common.view') as string}>
-266:                          title={t('transactions.voidTransaction') as string}
-285:            <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 0}>{t('common.previous')}</Button>
-286:            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>{t('common.next')}</Button>
-295:            <DialogTitle>{t('transactions.transactionDetail')} {selectedTx?.order_number}</DialogTitle>
-300:                <div><p className="text-muted-foreground">{t('transactions.dateTime')}</p><p className="font-medium">{formatDate(selectedTx.created_at, 'datetime')}</p></div>
-301:                <div><p className="text-muted-foreground">{t('transactions.paymentMethod')}</p><p className="font-medium">{methodLabel(selectedTx.payment_method)}</p></div>
-302:                <div><p className="text-muted-foreground">{t('transactions.cashier')}</p><p className="font-medium">{(selectedTx as any).cashier?.full_name || (selectedTx as any).cashier?.username || '-'}</p></div>
-303:                <div><p className="text-muted-foreground">{t('common.status')}</p>{statusBadge(selectedTx.status)}</div>
-307:                <p className="font-semibold text-foreground mb-2">{t('transactions.transactionItems')}</p>
-322:                <div className="flex justify-between text-muted-foreground"><span>{t('pos.subtotal')}</span><span>{formatCurrency(selectedTx.subtotal)}</span></div>
-324:                <div className="flex justify-between font-bold text-foreground text-base"><span>{t('pos.grandTotal')}</span><span className="text-primary">{formatCurrency(selectedTx.total)}</span></div>
-327:                    <div className="flex justify-between text-muted-foreground"><span>{t('pos.cashReceived')}</span><span>{formatCurrency(selectedTx.cash_received)}</span></div>
-328:                    <div className="flex justify-between text-muted-foreground"><span>{t('pos.change')}</span><span>{formatCurrency(selectedTx.change_amount)}</span></div>
-345:              {t('transactions.voidConfirm')}
-352:                      {t('transactions.voidWarningAdmin')}
-356:                      {t('transactions.voidBlockedCashier')}
-360:                  <p>{t('transactions.voidConfirmBody')} <strong className="text-foreground">{voidTx?.order_number}</strong></p>
-364:                    {t('transactions.voidReason')} <span className="text-destructive">*</span>
-369:                    placeholder={t('transactions.voidReasonPlaceholder') as string}
-377:            <AlertDialogCancel disabled={voidLoading}>{t('common.cancel')}</AlertDialogCancel>
-385:              {voidLoading ? t('common.loading') : t('transactions.voidConfirm')}
-[The command completed with exit code 0.]
-[Current working directory: /workspace/app-ca8n8duf25mp]
---END AGENT OBSERVATION--
-</observation>
-<action>
-FileReadAction(path='/workspace/app-ca8n8duf25mp/src/pages/ReportsPage.tsx', start=0, end=-1, thought='', action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[1, 80], user_hidden=False)
-</action>
-<observation>
-[Read from /workspace/app-ca8n8duf25mp/src/pages/ReportsPage.tsx is successful.]
-Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/pages/ReportsPage.tsx:
-     1 import { useEffect, useState, useCallback } from 'react';
-     2 import { useTranslation } from 'react-i18next';
-     3 import { CalendarDays, TrendingUp, TrendingDown, DollarSign, ShoppingBag, Package, ChevronDown, Camera } from 'lucide-react';
-     4 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-     5 import { Skeleton } from '@/components/ui/skeleton';
-     6 import { Button } from '@/components/ui/button';
-     7 import { Input } from '@/components/ui/input';
-     8 import {
-     9   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-    10 } from '@/components/ui/dropdown-menu';
-    11 import {
-    12   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    13   PieChart, Pie, Cell, Legend,
-    14 } from 'recharts';
-    15 import { supabase } from '@/db/supabase';
-    16 import { formatCurrency, formatDate } from '@/lib/utils';
-    17 import { sendScreenshotToTelegram } from '@/hooks/useTelegramScreenshot';
-    18 
-    19 interface SalesSummary {
-    20   totalSales: number;
-    21   totalOrders: number;
-    22   totalProfit: number;
-    23   profitMargin: number;
-    24   avgOrderValue: number;
-    25 }
-    26 
-    27 interface TopProduct { name: string; qty: number; revenue: number; }
-    28 interface ChartPoint { label: string; sales: number; profit: number; }
-    29 
-    30 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
-    31 
-    32 type PresetKey = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'custom';
-    33 
-    34 function toDateStr(d: Date) { return d.toISOString().split('T')[0]; }
-    35 
-    36 function getPresetRange(key: PresetKey): { from: string; to: string } {
-    37   const now = new Date();
-    38   const today = toDateStr(now);
-    39   if (key === 'today') return { from: today, to: today };
-    40   if (key === 'yesterday') {
-    41     const y = new Date(now); y.setDate(now.getDate() - 1); const ys = toDateStr(y);
-    42     return { from: ys, to: ys };
-    43   }
-    44   if (key === 'week') {
-    45     const w = new Date(now); w.setDate(now.getDate() - 6);
-    46     return { from: toDateStr(w), to: today };
-    47   }
-    48   if (key === 'month') {
-    49     return { from: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`, to: today };
-    50   }
-    51   if (key === 'year') {
-    52     return { from: `${now.getFullYear()}-01-01`, to: today };
-    53   }
-    54   return { from: today, to: today };
-    55 }
-    56 
-    57 // Build chart labels based on range length
-    58 function buildChartData(txArr: any[], from: string, to: string): ChartPoint[] {
-    59   const start = new Date(`${from}T00:00:00`);
-    60   const end = new Date(`${to}T00:00:00`);
-    61   const diffDays = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
-    62   const points: ChartPoint[] = [];
-    63 
-    64   if (diffDays <= 31) {
-    65     // Daily breakdown
-    66     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    67       const ds = toDateStr(d);
-    68       const dayTx = txArr.filter((t: any) => t.created_at?.startsWith(ds));
-    69       const sales = dayTx.reduce((s: number, t: any) => s + (t.total || 0), 0);
-    70       const profit = dayTx.reduce((s: number, t: any) =>
-    71         s + (Array.isArray(t.items) ? t.items : []).reduce((si: number, i: any) => si + ((i.unit_price - i.cost) * i.quantity), 0), 0);
-    72       points.push({ label: formatDate(new Date(ds), 'short'), sales: Math.round(sales), profit: Math.round(profit) });
-    73     }
-    74   } else {
-    75     // Monthly breakdown
-    76     const months: Record<string, ChartPoint> = {};
-    77     txArr.forEach((t: any) => {
-    78       const mo = t.created_at?.slice(0, 7); // "2025-06"
-    79       if (!mo) return;
-    80       if (!months[mo]) {
-
-
-</observation>
-<action>
-FileReadAction(path='/workspace/app-ca8n8duf25mp/src/pages/InventoryPage.tsx', start=0, end=-1, thought='', action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[1, 80], user_hidden=False)
-</action>
-<observation>
-[Read from /workspace/app-ca8n8duf25mp/src/pages/InventoryPage.tsx is successful.]
-Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/pages/InventoryPage.tsx:
-     1 import { useEffect, useState } from 'react';
-     2 import { useTranslation } from 'react-i18next';
-     3 import { AlertTriangle, Package, Pencil, Check, X } from 'lucide-react';
-     4 import { toast } from 'sonner';
-     5 import { supabase } from '@/db/supabase';
-     6 import { useAuth } from '@/contexts/AuthContext';
-     7 import { useAuditLog } from '@/hooks/useAuditLog';
-     8 import type { Product, StoreSettings } from '@/types/types';
-     9 import { Button } from '@/components/ui/button';
-    10 import { Input } from '@/components/ui/input';
-    11 import { Badge } from '@/components/ui/badge';
-    12 import { Skeleton } from '@/components/ui/skeleton';
-    13 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-    14 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-    15 
-    16 export default function InventoryPage() {
-    17   const { t } = useTranslation();
-    18   const { profile } = useAuth();
-    19   const { log } = useAuditLog();
-    20   const [products, setProducts] = useState<Product[]>([]);
-    21   const [settings, setSettings] = useState<StoreSettings | null>(null);
-    22   const [loading, setLoading] = useState(true);
-    23   const [editingId, setEditingId] = useState<string | null>(null);
-    24   const [editStock, setEditStock] = useState<string>('');
-    25 
-    26   useEffect(() => { loadData(); }, []);
-    27 
-    28   const loadData = async () => {
-    29     setLoading(true);
-    30     const [prodRes, settRes] = await Promise.all([
-    31       supabase.from('products').select('*, category:categories(name)').eq('is_active', true).order('name'),
-    32       supabase.from('store_settings').select('*').maybeSingle(),
-    33     ]);
-    34     setProducts(Array.isArray(prodRes.data) ? prodRes.data as Product[] : []);
-    35     setSettings(settRes.data as StoreSettings);
-    36     setLoading(false);
-    37   };
-    38 
-    39   const threshold = settings?.low_stock_threshold || 10;
-    40   const lowStock = products.filter(p => p.stock <= threshold);
-    41   const outOfStock = products.filter(p => p.stock === 0);
-    42 
-    43   const startEdit = (product: Product) => {
-    44     setEditingId(product.id);
-    45     setEditStock(product.stock.toString());
-    46   };
-    47 
-    48   const cancelEdit = () => { setEditingId(null); setEditStock(''); };
-    49 
-    50   const saveStock = async (product: Product) => {
-    51     const newStock = parseInt(editStock);
-    52     if (isNaN(newStock) || newStock < 0) { toast.error(t('inventory.invalidStock')); return; }
-    53     const prevStock = product.stock;
-    54     const { error } = await supabase.from('products').update({ stock: newStock }).eq('id', product.id);
-    55     if (error) { toast.error(t('inventory.updateFailed')); return; }
-    56     await supabase.from('inventory_logs').insert({
-    57       product_id: product.id,
-    58       change_amount: newStock - prevStock,
-    59       previous_stock: prevStock,
-    60       new_stock: newStock,
-    61       reason: 'manual_adjust',
-    62       store_id: profile?.store_id ?? null,
-    63     });
-    64     toast.success(`${t('inventory.updated')} ${product.name}`);
-    65 
-    66     // บันทึก audit log + ตรวจสอบการโกงสต็อก
-    67     const diff = newStock - prevStock;
-    68     await log('adjust_stock', {
-    69       entityType: 'product',
-    70       entityId: product.id,
-    71       details: {
-    72         product_name: product.name,
-    73         prev_stock: prevStock,
-    74         new_stock: newStock,
-    75         change: diff,
-    76       },
-    77       severity: Math.abs(diff) > 50 ? 'warning' : 'info',
-    78     });
-    79     // ตรวจสอบการโกงสต็อก (function จะตรวจสอบความถี่เองใน audit_logs)
-    80     if (profile?.id) {
-
-
-</observation>
-<action>
-FileReadAction(path='/workspace/app-ca8n8duf25mp/src/pages/POSPage.tsx', start=0, end=-1, thought='', action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[1, 60], user_hidden=False)
-</action>
-<observation>
-[Read from /workspace/app-ca8n8duf25mp/src/pages/POSPage.tsx is successful.]
-Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/pages/POSPage.tsx:
-     1 import { useEffect, useRef, useState } from 'react';
-     2 import { useTranslation } from 'react-i18next';
-     3 import {
-     4   Search, Plus, Minus, Trash2, ShoppingCart, Package,
-     5   Tag, ChevronRight, ScanLine, X,
-     6 } from 'lucide-react';
-     7 import { toast } from 'sonner';
-     8 import { supabase } from '@/db/supabase';
-     9 import { useAuth } from '@/contexts/AuthContext';
-    10 import { formatCurrency } from '@/lib/utils';
-    11 import type { CartItem, Category, Product, StoreSettings } from '@/types/types';
-    12 import { Button } from '@/components/ui/button';
-    13 import { Input } from '@/components/ui/input';
-    14 import { Badge } from '@/components/ui/badge';
-    15 import { Separator } from '@/components/ui/separator';
-    16 import { Skeleton } from '@/components/ui/skeleton';
-    17 import PaymentModal from '@/components/pos/PaymentModal';
-    18 import ReceiptModal from '@/components/pos/ReceiptModal';
-    19 
-    20 export default function POSPage() {
-    21   const { t } = useTranslation();
-    22   const { profile } = useAuth();
-    23   const [categories, setCategories] = useState<Category[]>([]);
-    24   const [products, setProducts] = useState<Product[]>([]);
-    25   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-    26   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-    27   const [searchQuery, setSearchQuery] = useState('');
-    28   const [cart, setCart] = useState<CartItem[]>([]);
-    29   const [settings, setSettings] = useState<StoreSettings | null>(null);
-    30   const [loading, setLoading] = useState(true);
-    31   const [showPayment, setShowPayment] = useState(false);
-    32   const [lastTransaction, setLastTransaction] = useState<{ id: string; orderNumber: string } | null>(null);
-    33   const [showReceipt, setShowReceipt] = useState(false);
-    34   const searchRef = useRef<HTMLInputElement>(null);
-    35 
-    36   useEffect(() => {
-    37     loadData();
-    38   }, []);
-    39 
-    40   useEffect(() => {
-    41     filterProducts();
-    42   }, [products, selectedCategory, searchQuery]);
-    43 
-    44   const loadData = async () => {
-    45     setLoading(true);
-    46     const [catRes, prodRes, settRes] = await Promise.all([
-    47       supabase.from('categories').select('*').order('sort_order'),
-    48       supabase.from('products').select('*, category:categories(*)').eq('is_active', true).order('name'),
-    49       supabase.from('store_settings').select('*').maybeSingle(),
-    50     ]);
-    51     setCategories(Array.isArray(catRes.data) ? catRes.data : []);
-    52     setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
-    53     setSettings(settRes.data);
-    54     setLoading(false);
-    55   };
-    56 
-    57   const filterProducts = () => {
-    58     let filtered = products;
-    59     if (selectedCategory !== 'all') {
-    60       filtered = filtered.filter(p => p.category_id === selectedCategory);
-
-
-</observation>
-<action>
-**CmdRunAction (source=EventSource.AGENT, is_input=False)**
-COMMAND:
-grep -n "t('" /workspace/app-ca8n8duf25mp/src/pages/TransactionsPage.tsx | grep -E "blocked|tamperingLogged|voidFailed|voidWarningAdmin|voidBlockedCashier|voidConfirmBody|searchPlaceholder|totalCount|statusCompleted|statusVoided|statusRefunded"
-</action>
-<observation>
-**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
-  "exit_code": 0,
-  "pid": -1,
-  "username": null,
-  "hostname": null,
-  "working_dir": "/workspace/app-ca8n8duf25mp",
-  "py_interpreter_path": null,
-  "prefix": "",
-  "suffix": "\n[The command completed with exit code 0.]"
-})**
---BEGIN AGENT OBSERVATION--
-97:      toast.error(`🚨 ${t('transactions.blocked')}: ${result.error}`, { duration: 6000 });
-98:      toast.warning(`⚠️ ${t('transactions.tamperingLogged')}`, { duration: 8000 });
-105:      toast.error(result.error || t('transactions.voidFailed') as string);
-153:      completed: { label: t('transactions.statusCompleted'), cls: 'bg-success/10 text-success' },
-154:      voided: { label: t('transactions.statusVoided'), cls: 'bg-destructive/10 text-destructive' },
-155:      refunded: { label: t('transactions.statusRefunded'), cls: 'bg-warning/10 text-warning' },
-173:        <p className="text-sm text-muted-foreground mt-0.5">{t('transactions.totalCount')} {total}</p>
-183:            placeholder={t('transactions.searchPlaceholder') as string}
-352:                      {t('transactions.voidWarningAdmin')}
-356:                      {t('transactions.voidBlockedCashier')}
-360:                  <p>{t('transactions.voidConfirmBody')} <strong className="text-foreground">{voidTx?.order_number}</strong></p>
-[The command completed with exit code 0.]
-[Current working directory: /workspace/app-ca8n8duf25mp]
---END AGENT OBSERVATION--
-</observation>
-<action>
-**CmdRunAction (source=EventSource.AGENT, is_input=False)**
-COMMAND:
-grep -n "t('" /workspace/app-ca8n8duf25mp/src/pages/ReportsPage.tsx | grep -v "^[0-9]*:.*//"; grep -n "t('" /workspace/app-ca8n8duf25mp/src/pages/InventoryPage.tsx | grep -v "^[0-9]*:.*//"; grep -n "t('" /workspace/app-ca8n8duf25mp/src/pages/POSPage.tsx | grep -v "^[0-9]*:.*//"; grep -n "t('" /workspace/app-ca8n8duf25mp/src/pages/DashboardPage.tsx | grep -E "fromDate|toDate|noData|pieces|searchPlaceholder" | head -20
-</action>
-<observation>
-**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
-  "exit_code": 0,
-  "pid": -1,
-  "username": null,
-  "hostname": null,
-  "working_dir": "/workspace/app-ca8n8duf25mp",
-  "py_interpreter_path": null,
-  "prefix": "",
-  "suffix": "\n[The command completed with exit code 0.]"
-})**
---BEGIN AGENT OBSERVATION--
-34:function toDateStr(d: Date) { return d.toISOString().split('T')[0]; }
-99:    { key: 'today', label: t('reports.today') },
-100:    { key: 'yesterday', label: t('reports.yesterday') },
-101:    { key: 'week', label: t('dashboard.last7days') },
-102:    { key: 'month', label: t('reports.thisMonth') },
-103:    { key: 'year', label: t('reports.thisYear') },
-104:    { key: 'custom', label: t('reports.custom') },
-126:      .select('total, created_at, items:transaction_items(product_name, quantity, unit_price, cost, subtotal)')
-165:    : PRESETS.find(p => p.key === preset)?.label ?? t('dashboard.last7days');
-168:    { title: t('reports.totalSales'), value: summary ? formatCurrency(summary.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
-169:    { title: t('reports.totalOrders'), value: summary ? `${summary.totalOrders} ${t('common.items')}` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
-170:    { title: t('reports.totalProfit'), value: summary ? formatCurrency(summary.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
-171:    { title: t('reports.profitMargin'), value: summary ? `${summary.profitMargin.toFixed(1)}%` : '-', icon: TrendingDown, color: 'text-warning', bg: 'bg-warning/10' },
-172:    { title: t('dashboard.avgOrderValue'), value: summary ? formatCurrency(summary.avgOrderValue) : '-', icon: CalendarDays, color: 'text-chart-4', bg: 'bg-chart-4/10' },
-180:          <h2 className="text-xl font-bold text-foreground text-balance">{t('reports.title')}</h2>
-187:            onClick={() => sendScreenshotToTelegram({ elementId: 'reports-capture', caption: `📈 ${t('reports.title')} — ${activeLabel}` })}
-188:            title={t('dashboard.sendToTelegram')}
-191:            <span className="hidden md:inline">{t('dashboard.sendToTelegram')}</span>
-209:              <DropdownMenuItem onClick={() => applyPreset('custom')}
-211:                {t('reports.custom')}...
-222:            <label className="text-xs text-muted-foreground font-medium">{t('common.from')}</label>
-226:            <label className="text-xs text-muted-foreground font-medium">{t('common.to')}</label>
-229:          <Button size="sm" onClick={loadReport} className="h-9">{t('reports.viewReport')}</Button>
-263:            <CardTitle className="text-base font-semibold">{t('reports.salesAndProfit')}</CardTitle>
-269:              <div className="flex items-center justify-center h-56 text-muted-foreground text-sm">{t('common.noDataInRange')}</div>
-282:                  <Bar dataKey="sales" name={t('dashboard.sales')} fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
-283:                  <Bar dataKey="profit" name={t('dashboard.profit')} fill="hsl(var(--chart-2))" radius={[3, 3, 0, 0]} />
-294:            <CardTitle className="text-base font-semibold">{t('reports.topProductsPie')}</CardTitle>
-302:                <p className="text-sm">{t('common.noData')}</p>
-315:                    <Tooltip formatter={(v: number, name: string) => [`${v} ${t('common.pieces')}`, name]}
-329:          <CardTitle className="text-base font-semibold">{t('reports.top10Products')}</CardTitle>
-337:                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">{t('reports.product')}</th>
-338:                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">{t('reports.qtySold')}</th>
-339:                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">{t('reports.revenue')}</th>
-353:                    <td colSpan={4} className="text-center py-8 text-muted-foreground text-sm">{t('common.noDataInRange')}</td>
-31:      supabase.from('products').select('*, category:categories(name)').eq('is_active', true).order('name'),
-32:      supabase.from('store_settings').select('*').maybeSingle(),
-52:    if (isNaN(newStock) || newStock < 0) { toast.error(t('inventory.invalidStock')); return; }
-55:    if (error) { toast.error(t('inventory.updateFailed')); return; }
-64:    toast.success(`${t('inventory.updated')} ${product.name}`);
-139:            <Badge variant="secondary" className="bg-destructive/10 text-destructive text-xs">{t('inventory.outOfStock')}</Badge>
-142:              <AlertTriangle className="w-3 h-3" />{t('inventory.lowStock')}
-145:            <Badge variant="secondary" className="bg-success/10 text-success text-xs">{t('inventory.normal')}</Badge>
-165:              <TableHead className="whitespace-nowrap">{t('inventory.product')}</TableHead>
-166:              <TableHead className="whitespace-nowrap">{t('inventory.category')}</TableHead>
-167:              <TableHead className="whitespace-nowrap text-right">{t('inventory.stockQty')}</TableHead>
-168:              <TableHead className="whitespace-nowrap text-center">{t('common.status')}</TableHead>
-169:              <TableHead className="whitespace-nowrap text-right">{t('common.edit')}</TableHead>
-184:                  {t('common.noItems')}
-197:        <h2 className="text-xl font-bold text-foreground text-balance">{t('inventory.title')}</h2>
-199:          <span className="text-sm text-muted-foreground">{t('inventory.total')}: <strong>{products.length}</strong></span>
-200:          <span className="text-sm text-warning">{t('inventory.lowStock')}: <strong>{lowStock.length}</strong></span>
-201:          <span className="text-sm text-destructive">{t('inventory.outOfStock')}: <strong>{outOfStock.length}</strong></span>
-207:          <TabsTrigger value="all">{t('common.all')} ({products.length})</TabsTrigger>
-209:            {t('inventory.lowStock')} ({lowStock.length})
-212:            {t('inventory.outOfStock')} ({outOfStock.length})
-47:      supabase.from('categories').select('*').order('sort_order'),
-48:      supabase.from('products').select('*, category:categories(*)').eq('is_active', true).order('name'),
-49:      supabase.from('store_settings').select('*').maybeSingle(),
-124:      toast.success(`${t('pos.addedToCart')} ${product.name}`);
-126:      toast.error(`${t('pos.barcodeNotFound')}: ${barcode}`);
-158:                placeholder={t('pos.searchPlaceholder')}
-170:            <Button variant="outline" size="icon" title={t('pos.scanBarcode')} onClick={() => searchRef.current?.focus()}>
-213:              <p className="text-sm">{t('pos.noProducts')}</p>
-244:                        {t('pos.stockLeft')}: {product.stock}
-271:            <span className="font-semibold text-foreground">{t('pos.cart')}</span>
-279:              <span className="text-xs">{t('pos.clear')}</span>
-289:              <p className="text-sm">{t('pos.emptyCart')}</p>
-290:              <p className="text-xs mt-1">{t('pos.clickToAdd')}</p>
-298:                    <p className="text-xs text-muted-foreground mt-0.5">{formatCurrency(item.unit_price)} / {t('pos.perUnit')}</p>
-337:            <span>{t('pos.subtotal')}</span>
-342:              <span>{t('pos.taxVat')} {taxRate}%</span>
-348:            <span>{t('pos.grandTotal')}</span>
-357:            {t('pos.checkout')}
-34:function toDateStr(d: Date) { return d.toISOString().split('T')[0]; }
-245:            <div className="flex items-center justify-center h-56 text-muted-foreground text-sm">{t('common.noDataInRange')}</div>
-277:              <p className="text-sm text-muted-foreground text-center py-6">{t('common.noDataInRange')}</p>
-[The command completed with exit code 0.]
-[Current working directory: /workspace/app-ca8n8duf25mp]
---END AGENT OBSERVATION--
-</observation>
-<action>
-FileReadAction(path='/workspace/app-ca8n8duf25mp/src/i18n/locales/th.ts', start=0, end=-1, thought='', action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[1, 80], user_hidden=False)
-</action>
-<observation>
-[Read from /workspace/app-ca8n8duf25mp/src/i18n/locales/th.ts is successful.]
-Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/i18n/locales/th.ts:
-     1 // ภาษาไทย
-     2 const th = {
-     3   // ============ ทั่วไป ============
-     4   common: {
-     5     save: 'บันทึก',
-     6     cancel: 'ยกเลิก',
-     7     delete: 'ลบ',
-     8     edit: 'แก้ไข',
-     9     add: 'เพิ่ม',
-    10     search: 'ค้นหา',
-    11     confirm: 'ยืนยัน',
-    12     close: 'ปิด',
-    13     loading: 'กำลังโหลด...',
-    14     noData: 'ไม่มีข้อมูล',
-    15     error: 'เกิดข้อผิดพลาด',
-    16     success: 'สำเร็จ',
-    17     warning: 'คำเตือน',
-    18     all: 'ทั้งหมด',
-    19     active: 'ใช้งาน',
-    20     inactive: 'ปิดใช้งาน',
-    21     yes: 'ใช่',
-    22     no: 'ไม่',
-    23     view: 'ดู',
-    24     create: 'สร้าง',
-    25     update: 'อัพเดท',
-    26     refresh: 'รีเฟรช',
-    27     filter: 'กรอง',
-    28     export: 'ส่งออก',
-    29     print: 'พิมพ์',
-    30     back: 'กลับ',
-    31     next: 'ถัดไป',
-    32     previous: 'ก่อนหน้า',
-    33     required: 'จำเป็น',
-    34     optional: 'ไม่บังคับ',
-    35     actions: 'การดำเนินการ',
-    36     status: 'สถานะ',
-    37     name: 'ชื่อ',
-    38     description: 'รายละเอียด',
-    39     date: 'วันที่',
-    40     time: 'เวลา',
-    41     total: 'รวม',
-    42     baht: 'บาท',
-    43     items: 'รายการ',
-    44     piece: 'ชิ้น',
-    45     unit: 'หน่วย',
-    46     noPermission: 'คุณไม่มีสิทธิ์ดำเนินการนี้',
-    47     test: 'ทดสอบ',
-    48     enable: 'เปิดใช้',
-    49     disable: 'ปิดใช้',
-    50   },
-    51 
-    52   // ============ หน้า Login ============
-    53   login: {
-    54     title: 'เข้าสู่ระบบ',
-    55     subtitle: 'ระบบขายหน้าร้าน POS',
-    56     username: 'ชื่อผู้ใช้',
-    57     password: 'รหัสผ่าน',
-    58     usernamePlaceholder: 'กรอกชื่อผู้ใช้',
-    59     passwordPlaceholder: 'กรอกรหัสผ่าน',
-    60     loginButton: 'เข้าสู่ระบบ',
-    61     loggingIn: 'กำลังเข้าสู่ระบบ...',
-    62     invalidCredentials: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-    63     accountSuspended: 'บัญชีนี้ถูกระงับ (ใบแดง) กรุณาติดต่อผู้ดูแลระบบ',
-    64     storeClosed: 'ร้านค้าของคุณถูกปิดชั่วคราว กรุณาติดต่อผู้ดูแลระบบ',
-    65     loginSuccess: 'เข้าสู่ระบบสำเร็จ',
-    66     selectLanguage: 'เลือกภาษา',
-    67     systemName: 'ระบบขายหน้าร้าน',
-    68     agreePrefix: 'ฉันยอมรับ',
-    69     agreeAnd: 'และ',
-    70     termsOfService: 'ข้อตกลงการใช้งาน',
-    71     privacyPolicy: 'นโยบายความเป็นส่วนตัว',
-    72     copyright: 'ระบบขายหน้าร้าน POS',
-    73   },
-    74 
-    75   // ============ Navigation ============
-    76   nav: {
-    77     dashboard: 'แดชบอร์ด',
-    78     pos: 'หน้าขาย',
-    79     products: 'สินค้า',
-    80     inventory: 'คลังสินค้า',
-
-
-</observation>
-<action>
-FileReadAction(path='/workspace/app-ca8n8duf25mp/src/i18n/locales/th.ts', start=0, end=-1, thought='', action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[80, 550], user_hidden=False)
-</action>
-<observation>
-[Read from /workspace/app-ca8n8duf25mp/src/i18n/locales/th.ts is successful.]
-Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/i18n/locales/th.ts:
-    80     inventory: 'คลังสินค้า',
-    81     transactions: 'ประวัติการขาย',
-    82     reports: 'รายงาน',
-    83     users: 'ผู้ใช้งาน',
-    84     roles: 'ยศและสิทธิ์',
-    85     fraudMonitor: 'ตรวจจับการโกง',
-    86     settings: 'ตั้งค่า',
-    87     superAdmin: 'Super Admin',
-    88     logout: 'ออกจากระบบ',
-    89     store: 'ร้าน',
-    90   },
-    91 
-    92   // ============ แดชบอร์ด ============
-    93   dashboard: {
-    94     title: 'แดชบอร์ด',
-    95     subtitle: 'สรุปภาพรวมของร้าน',
-    96     todaySales: 'ยอดขายวันนี้',
-    97     todayProfit: 'กำไรวันนี้',
-    98     todayOrders: 'จำนวนออเดอร์วันนี้',
-    99     avgOrderValue: 'มูลค่าเฉลี่ยต่อออเดอร์',
-   100     salesChart: 'กราฟยอดขาย',
-   101     topProducts: 'สินค้าขายดี',
-   102     recentTransactions: 'รายการล่าสุด',
-   103     daily: 'รายวัน',
-   104     weekly: 'รายสัปดาห์',
-   105     monthly: 'รายเดือน',
-   106     orders: 'ออเดอร์',
-   107     totalSales: 'ยอดขายรวม',
-   108     totalOrders: 'ออเดอร์',
-   109     totalProfit: 'กำไรรวม',
-   110     lowStock: 'สินค้าใกล้หมด',
-   111     salesAndProfit: 'ยอดขาย & กำไร',
-   112     noDataInPeriod: 'ไม่มีข้อมูลในช่วงที่เลือก',
-   113     recentSales: 'รายการขายล่าสุด',
-   114     allStockOk: 'สินค้าทุกรายการมีสต็อกเพียงพอ',
-   115     remaining: 'เหลือ',
-   116     noCategory: 'ไม่มีหมวดหมู่',
-   117     today: 'วันนี้',
-   118     yesterday: 'เมื่อวาน',
-   119     last7days: '7 วันล่าสุด',
-   120     thisMonth: 'เดือนนี้',
-   121     customRange: 'กำหนดเอง',
-   122     fromDate: 'จากวันที่',
-   123     toDate: 'ถึงวันที่',
-   124     viewData: 'ดูข้อมูล',
-   125     sendToTelegram: 'ส่งรูปไป Telegram',
-   126     sales: 'ยอดขาย',
-   127     profit: 'กำไร',
-   128     pieces: 'รายการ',
-   129     cash: 'เงินสด',
-   130     card: 'บัตรเครดิต/เดบิต',
-   131     qr: 'QR Code',
-   132   },
-   133 
-   134   // ============ หน้าขาย POS ============
-   135   pos: {
-   136     title: 'หน้าขาย',
-   137     searchOrScan: 'ค้นหาหรือสแกนบาร์โค้ด...',
-   138     searchProduct: 'ค้นหาสินค้า...',
-   139     cart: 'ตะกร้าสินค้า',
-   140     emptyCart: 'ยังไม่มีสินค้าในตะกร้า',
-   141     clickToAdd: 'คลิกสินค้าเพื่อเพิ่ม',
-   142     clearCart: 'ล้าง',
-   143     subtotal: 'ยอดรวมสินค้า',
-   144     tax: 'ภาษี VAT',
-   145     grandTotal: 'ยอดชำระ',
-   146     payment: 'ชำระเงิน',
-   147     cash: 'เงินสด',
-   148     card: 'บัตรเครดิต/เดบิต',
-   149     qrCode: 'QR Code',
-   150     cashReceived: 'รับเงินมา',
-   151     change: 'เงินทอน',
-   152     confirmPayment: 'ยืนยันการชำระเงิน',
-   153     paymentSuccess: 'ชำระเงินสำเร็จ',
-   154     newSale: 'ขายใหม่',
-   155     printReceipt: 'พิมพ์ใบเสร็จ',
-   156     outOfStock: 'หมด',
-   157     lowStock: 'สินค้าใกล้หมด',
-   158     qty: 'จำนวน',
-   159     price: 'ราคา',
-   160     perPiece: '/ ชิ้น',
-   161     stockRemaining: 'คงเหลือ',
-   162     allCategories: 'ทั้งหมด',
-   163     scanBarcode: 'สแกนบาร์โค้ด',
-   164     barcodeNotFound: 'ไม่พบสินค้าบาร์โค้ด',
-   165     insufficientStock: 'สต็อกมีแค่',
-   166     pieces: 'ชิ้น',
-   167     noProducts: 'ไม่พบสินค้า',
-   168     addedToCart: 'เพิ่มแล้ว',
-   169     checkout: 'ชำระเงิน',
-   170   },
-   171 
-   172   // ============ สินค้า ============
-   173   products: {
-   174     title: 'จัดการสินค้า',
-   175     addProduct: 'เพิ่มสินค้า',
-   176     editProduct: 'แก้ไขสินค้า',
-   177     deleteProduct: 'ลบสินค้า',
-   178     productName: 'ชื่อสินค้า',
-   179     sku: 'รหัสสินค้า (SKU)',
-   180     barcode: 'บาร์โค้ด',
-   181     category: 'หมวดหมู่',
-   182     price: 'ราคาขาย',
-   183     cost: 'ต้นทุน',
-   184     stock: 'จำนวนสต็อก',
-   185     image: 'รูปภาพสินค้า',
-   186     uploadImage: 'อัปโหลดรูปภาพ',
-   187     deleteConfirm: 'ยืนยันการลบสินค้า',
-   188     deleteWarning: 'การลบสินค้าไม่สามารถย้อนกลับได้',
-   189     saveSuccess: 'บันทึกสินค้าสำเร็จ',
-   190     deleteSuccess: 'ลบสินค้าสำเร็จ',
-   191     noProducts: 'ไม่พบสินค้า',
-   192     filterByCategory: 'กรองตามหมวดหมู่',
-   193     manageCategories: 'จัดการหมวดหมู่',
-   194     addCategory: 'เพิ่มหมวดหมู่',
-   195     categoryName: 'ชื่อหมวดหมู่',
-   196     totalProducts: 'สินค้าทั้งหมด',
-   197     activeProducts: 'สินค้าที่ใช้งาน',
-   198     lowStockItems: 'สินค้าใกล้หมด',
-   199     allCategories: 'หมวดหมู่ทั้งหมด',
-   200     noCategory: 'ไม่มีหมวดหมู่',
-   201     status: 'สถานะ',
-   202     manage: 'จัดการ',
-   203     productCol: 'สินค้า',
-   204     activeStatus: 'ใช้งาน',
-   205     inactiveStatus: 'ปิดใช้',
-   206     deleteFailHasTransaction: 'ลบสินค้าไม่สำเร็จ: อาจมีรายการขายที่ใช้สินค้านี้อยู่',
-   207     addProductNew: 'เพิ่มสินค้าใหม่',
-   208     searchPlaceholder: 'ค้นหาชื่อสินค้า, รหัส...',
-   209     imageOptional: 'รูปภาพสินค้า (ไม่บังคับ)',
-   210     activeLabel: 'เปิดใช้งานสินค้า',
-   211     namePlaceholder: 'กรอกชื่อสินค้า',
-   212     deleteProductTitle: 'ลบสินค้า',
-   213     deleteProductDesc: 'ต้องการลบ',
-   214     deleteProductConfirm: 'ยืนยัน ลบสินค้า',
-   215   },
-   216 
-   217   // ============ คลังสินค้า ============
-   218   inventory: {
-   219     title: 'จัดการคลังสินค้า',
-   220     adjustStock: 'ปรับสต็อก',
-   221     reason: 'เหตุผล',
-   222     reasonRequired: 'กรุณาระบุเหตุผล',
-   223     newQty: 'จำนวนใหม่',
-   224     currentQty: 'จำนวนปัจจุบัน',
-   225     adjustment: 'การปรับ',
-   226     adjustSuccess: 'ปรับสต็อกสำเร็จ',
-   227     lowStockAlert: 'สินค้าใกล้หมด',
-   228     stockHistory: 'ประวัติการปรับสต็อก',
-   229     noLowStock: 'ไม่มีสินค้าใกล้หมด',
-   230     manualAdjust: 'ปรับด้วยตนเอง',
-   231     reasonPlaceholder: 'ระบุเหตุผลการปรับสต็อก...',
-   232     product: 'สินค้า',
-   233     category: 'หมวดหมู่',
-   234     stockQty: 'จำนวนสต็อก',
-   235     status: 'สถานะ',
-   236     outOfStock: 'หมด',
-   237     nearlyOut: 'ใกล้หมด',
-   238     normal: 'ปกติ',
-   239     allProducts: 'สินค้าทั้งหมด',
-   240     totalProducts: 'สินค้าทั้งหมด',
-   241     outOfStockCount: 'สินค้าหมด',
-   242     nearlyOutCount: 'ใกล้หมด',
-   243     searchPlaceholder: 'ค้นหาชื่อสินค้า...',
-   244     noData: 'ไม่พบสินค้า',
-   245     adjustStockTitle: 'ปรับสต็อก',
-   246     newStockQty: 'จำนวนสต็อกใหม่',
-   247   },
-   248 
-   249   // ============ ประวัติการขาย ============
-   250   transactions: {
-   251     title: 'ประวัติการขาย',
-   252     orderNumber: 'เลขออเดอร์',
-   253     cashier: 'แคชเชียร์',
-   254     amount: 'ยอดรวม',
-   255     paymentMethod: 'วิธีชำระเงิน',
-   256     status: 'สถานะ',
-   257     completed: 'สำเร็จ',
-   258     voided: 'ยกเลิกแล้ว',
-   259     refunded: 'คืนเงินแล้ว',
-   260     voidTransaction: 'ยกเลิกรายการ',
-   261     voidReason: 'เหตุผลการยกเลิก',
-   262     voidReasonRequired: 'กรุณาระบุเหตุผล',
-   263     voidSuccess: 'ยกเลิกรายการสำเร็จ',
-   264     viewDetails: 'ดูรายละเอียด',
-   265     transactionDetail: 'รายละเอียดรายการ',
-   266     transactionItems: 'รายการสินค้า',
-   267     cannotVoidCompleted: 'ไม่สามารถยกเลิกบิลที่สำเร็จแล้วได้',
-   268     tamperingDetected: 'ตรวจพบการพยายามแก้ไขข้อมูล',
-   269     filterByDate: 'กรองตามวันที่',
-   270     filterByStatus: 'กรองตามสถานะ',
-   271     dateFrom: 'จากวันที่',
-   272     dateTo: 'ถึงวันที่',
-   273     cash: 'เงินสด',
-   274     card: 'บัตร',
-   275     qr: 'QR Code',
-   276     allStatus: 'ทุกสถานะ',
-   277     allPayment: 'ทุกวิธี',
-   278     received: 'รับมา',
-   279     change: 'ทอน',
-   280     voidConfirm: 'ยืนยันการยกเลิก',
-   281     voidReasonPlaceholder: 'ระบุเหตุผล...',
-   282     noData: 'ไม่พบรายการ',
-   283     dateTime: 'วันที่/เวลา',
-   284   },
-   285 
-   286   // ============ รายงาน ============
-   287   reports: {
-   288     title: 'รายงาน',
-   289     salesReport: 'รายงานยอดขาย',
-   290     profitReport: 'รายงานกำไร',
-   291     topProducts: 'สินค้าขายดี',
-   292     totalSales: 'ยอดขายรวม',
-   293     totalProfit: 'กำไรรวม',
-   294     totalOrders: 'ออเดอร์รวม',
-   295     profitMargin: 'อัตรากำไร',
-   296     selectPeriod: 'เลือกช่วงเวลา',
-   297     today: 'วันนี้',
-   298     yesterday: 'เมื่อวาน',
-   299     thisWeek: 'สัปดาห์นี้',
-   300     thisMonth: 'เดือนนี้',
-   301     custom: 'กำหนดเอง',
-   302     rank: 'อันดับ',
-   303     quantitySold: 'จำนวนที่ขาย',
-   304     revenue: 'รายได้',
-   305     cost: 'ต้นทุน',
-   306     profit: 'กำไร',
-   307     noData: 'ไม่มีข้อมูลในช่วงเวลานี้',
-   308     salesAndProfit: 'ยอดขาย & กำไร',
-   309     topProducts10: 'สินค้าขายดี 10 อันดับ',
-   310     pieces: 'ชิ้น',
-   311     dateFrom: 'จากวันที่',
-   312     dateTo: 'ถึงวันที่',
-   313     sales: 'ยอดขาย',
-   314     orders: 'ออเดอร์',
-   315     noTopProducts: 'ไม่มีข้อมูลสินค้าขายดี',
-   316   },
-   317 
-   318   // ============ ผู้ใช้งาน ============
-   319   users: {
-   320     title: 'จัดการผู้ใช้งาน',
-   321     addUser: 'เพิ่มผู้ใช้',
-   322     editUser: 'แก้ไขผู้ใช้',
-   323     deleteUser: 'ลบผู้ใช้',
-   324     username: 'ชื่อผู้ใช้',
-   325     fullName: 'ชื่อ-นามสกุล',
-   326     role: 'ยศ/ตำแหน่ง',
-   327     password: 'รหัสผ่าน',
-   328     confirmPassword: 'ยืนยันรหัสผ่าน',
-   329     warningStatus: 'สถานะใบเตือน',
-   330     normal: 'ปกติ',
-   331     yellowCard: 'ใบเหลือง',
-   332     redCard: 'ใบแดง (ระงับ)',
-   333     issueWarning: 'ออกใบเตือน',
-   334     warningType: 'ประเภทใบเตือน',
-   335     warningReason: 'เหตุผล',
-   336     warningReasonRequired: 'กรุณาระบุเหตุผล',
-   337     warningHistory: 'ประวัติใบเตือน',
-   338     noWarningHistory: 'ไม่มีประวัติใบเตือน',
-   339     issuedBy: 'ออกโดย',
-   340     issuedAt: 'วันที่ออก',
-   341     saveSuccess: 'บันทึกผู้ใช้สำเร็จ',
-   342     deleteSuccess: 'ลบผู้ใช้สำเร็จ',
-   343     warningSuccess: 'ออกใบเตือนสำเร็จ',
-   344     cannotCreateStoreOwner: 'ไม่มีสิทธิ์สร้างเจ้าของร้านคนอื่น',
-   345     deleteConfirm: 'ยืนยันการลบผู้ใช้',
-   346     deleteWarning: 'การลบผู้ใช้ไม่สามารถย้อนกลับได้',
-   347     passwordMismatch: 'รหัสผ่านไม่ตรงกัน',
-   348     totalUsers: 'ผู้ใช้ทั้งหมด',
-   349     activeUsers: 'ผู้ใช้ที่ใช้งาน',
-   350     suspendedUsers: 'ผู้ใช้ที่ถูกระงับ',
-   351   },
-   352 
-   353   // ============ ยศและสิทธิ์ ============
-   354   roles: {
-   355     title: 'จัดการยศและสิทธิ์',
-   356     addRole: 'สร้างยศใหม่',
-   357     editRole: 'แก้ไขยศ',
-   358     deleteRole: 'ลบยศ',
-   359     roleName: 'ชื่อยศ',
-   360     roleColor: 'สีประจำยศ',
-   361     permissionsLabel: 'การใช้งาน',
-   362     systemRole: 'ยศระบบ (ลบไม่ได้)',
-   363     usersWithRole: 'ผู้ใช้',
-   364     saveSuccess: 'บันทึกยศสำเร็จ',
-   365     deleteSuccess: 'ลบยศสำเร็จ',
-   366     deleteConfirm: 'ยืนยันการลบยศ',
-   367     cannotDeleteSystem: 'ไม่สามารถลบยศระบบได้',
-   368     cannotDeleteHasUsers: 'ไม่สามารถลบยศที่มีผู้ใช้งานอยู่',
-   369     permissionGroups: {
-   370       sales: 'การขาย',
-   371       products: 'สินค้าและคลัง',
-   372       management: 'การจัดการ',
-   373       security: 'ความปลอดภัย',
-   374     },
-   375     permissions: {
-   376       view_dashboard: 'ดู Dashboard',
-   377       view_reports: 'ดูรายงาน',
-   378       view_profit: 'ดูกำไร',
-   379       view_cost: 'ดูต้นทุน',
-   380       manage_products: 'จัดการสินค้า',
-   381       manage_inventory: 'จัดการคลังสินค้า',
-   382       manage_categories: 'จัดการหมวดหมู่',
-   383       process_sales: 'ขายสินค้า',
-   384       void_transactions: 'ยกเลิกรายการ',
-   385       view_transactions: 'ดูประวัติการขาย',
-   386       view_all_transactions: 'ดูประวัติการขายทั้งหมด',
-   387       manage_users: 'จัดการผู้ใช้',
-   388       manage_roles: 'จัดการยศ',
-   389       manage_settings: 'ตั้งค่าร้าน',
-   390       view_audit_log: 'ดู Audit Log',
-   391       view_fraud_alerts: 'ดู Fraud Alert',
-   392       issue_warnings: 'ออกใบเตือนพนักงาน',
-   393     },
-   394   },
-   395 
-   396   // ============ Fraud Monitor ============
-   397   fraud: {
-   398     title: 'ตรวจจับการโกง',
-   399     auditLog: 'Audit Log',
-   400     fraudAlerts: 'Fraud Alerts',
-   401     statistics: 'สถิติ',
-   402     severity: 'ระดับ',
-   403     low: 'ต่ำ',
-   404     medium: 'กลาง',
-   405     high: 'สูง',
-   406     critical: 'วิกฤต',
-   407     warning: 'เฝ้าระวัง',
-   408     info: 'ข้อมูล',
-   409     alertType: 'ประเภท Alert',
-   410     reviewed: 'ตรวจสอบแล้ว',
-   411     unreviewed: 'ยังไม่ตรวจสอบ',
-   412     markReviewed: 'ทำเครื่องหมายตรวจสอบแล้ว',
-   413     noAlerts: 'ไม่มี Alert',
-   414     noLogs: 'ไม่มีบันทึก',
-   415     totalAlerts: 'Alert ทั้งหมด',
-   416     unreviewedAlerts: 'ยังไม่ตรวจสอบ',
-   417     criticalAlerts: 'วิกฤต',
-   418     action: 'การดำเนินการ',
-   419     user: 'ผู้ใช้',
-   420     details: 'รายละเอียด',
-   421     newAlertDetected: 'ตรวจพบพฤติกรรมน่าสงสัยใหม่!',
-   422     // action labels
-   423     actionLogin: 'เข้าสู่ระบบ',
-   424     actionLogout: 'ออกจากระบบ',
-   425     actionFailedLogin: 'Login ผิดพลาด',
-   426     actionProcessSale: 'ขายสินค้า',
-   427     actionVoidTransaction: 'ยกเลิกรายการ',
-   428     actionRefund: 'คืนเงิน',
-   429     actionAdjustStock: 'แก้ไขสต็อก',
-   430     actionAddProduct: 'เพิ่มสินค้า',
-   431     actionEditProduct: 'แก้ไขสินค้า',
-   432     actionDeleteProduct: 'ลบสินค้า',
-   433     actionAddUser: 'เพิ่มผู้ใช้',
-   434     actionEditUser: 'แก้ไขผู้ใช้',
-   435     actionCreateRole: 'สร้างยศ',
-   436     actionEditRole: 'แก้ไขยศ',
-   437     actionDeleteRole: 'ลบยศ',
-   438     actionChangeSettings: 'เปลี่ยนตั้งค่า',
-   439     // fraud types
-   440     fraudExcessiveVoids: 'ยกเลิกรายการมากผิดปกติ',
-   441     fraudSuspiciousStock: 'แก้ไขสต็อกน่าสงสัย',
-   442     fraudBruteForce: 'พยายาม Login ซ้ำๆ',
-   443     fraudPriceManipulation: 'พยายามแก้ไขราคา',
-   444     fraudAfterHours: 'ขายสินค้านอกเวลา',
-   445     fraudTampering: '🚨 ยักยอกทรัพย์',
-   446     allSeverity: 'ทุกระดับ',
-   447     allStatus: 'ทุกสถานะ',
-   448     searchPlaceholder: 'ค้นหาผู้ใช้, ประเภท...',
-   449     loadingData: 'กำลังโหลดข้อมูล...',
-   450     refreshing: 'กำลังรีเฟรช...',
-   451     markAllReviewed: 'ทำเครื่องหมายทั้งหมด',
-   452     autoRefresh: 'รีเฟรชอัตโนมัติ',
-   453   },
-   454 
-   455   // ============ ตั้งค่า ============
-   456   settings: {
-   457     title: 'ตั้งค่าร้าน',
-   458     storeInfo: 'ข้อมูลร้านค้า',
-   459     storeName: 'ชื่อร้าน',
-   460     storeLogo: 'โลโก้ร้าน',
-   461     uploadLogo: 'อัปโหลดโลโก้',
-   462     uploadingLogo: 'กำลังอัปโหลด...',
-   463     logoUploaded: 'อัปโหลดโลโก้สำเร็จ',
-   464     logoUploadFail: 'อัปโหลดโลโก้ไม่สำเร็จ',
-   465     removeLogo: 'ลบโลโก้',
-   466     logoHint: 'แนะนำรูปสี่เหลี่ยมจัตุรัส ขนาด 200×200px ขึ้นไป (PNG, JPG)',
-   467     address: 'ที่อยู่',
-   468     phone: 'เบอร์โทรศัพท์',
-   469     generalSettings: 'การตั้งค่าทั่วไป',
-   470     taxRate: 'ภาษีมูลค่าเพิ่ม (%)',
-   471     autoPrintReceipt: 'พิมพ์ใบเสร็จอัตโนมัติ',
-   472     lowStockThreshold: 'จำนวนขั้นต่ำแจ้งเตือนสินค้าใกล้หมด',
+่ำแจ้งเตือนสินค้าใกล้หมด',
    473     maxVoidPerDay: 'จำนวนยกเลิกสูงสุดต่อวัน',
    474     currency: 'สกุลเงิน',
    475     telegramSettings: 'การตั้งค่า Telegram Bot',
@@ -5829,4 +4568,1422 @@ New String: ```
 <observation>
 The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
 
+</observation>
+<action>
+**MessageAction** (source=EventSource.USER)
+CONTENT: An error was detected! Our R&D Engineer agent can help. Please try to fix it quickly. Let's get it working again!
+</action>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Store className="w-3.5 h-3.5" />ชื่อร้าน *</FormLabel>
+                    <FormControl><Input {...field} placeholder="ร้านของฉัน" /></FormControl>
+```
+New String: ```
+                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Store className="w-3.5 h-3.5" />{t('settings.storeName')}</FormLabel>
+                    <FormControl><Input {...field} placeholder={t('settings.storeNamePlaceholder')} /></FormControl>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                <Button type="submit" disabled={savingSettings} className="w-full md:w-auto">
+                  <Save className="w-4 h-4 mr-1.5" />{savingSettings ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่า'}
+                </Button>
+```
+New String: ```
+                <Button type="submit" disabled={savingSettings} className="w-full md:w-auto">
+                  <Save className="w-4 h-4 mr-1.5" />{savingSettings ? t('settings.saving') : t('settings.saveSettings')}
+                </Button>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+              {telegramStatus === 'ok' && <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 gap-1 text-xs"><CheckCircle className="w-3 h-3" />เชื่อมต่อแล้ว</Badge>}
+              {telegramStatus === 'fail' && <Badge className="bg-destructive/10 text-destructive gap-1 text-xs"><XCircle className="w-3 h-3" />เชื่อมต่อไม่ได้</Badge>}
+              {webhookStatus === 'ok' && <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 gap-1 text-xs"><Link2 className="w-3 h-3" />Webhook ใช้งานได้</Badge>}
+```
+New String: ```
+              {telegramStatus === 'ok' && <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 gap-1 text-xs"><CheckCircle className="w-3 h-3" />{t('settings.telegramConnected')}</Badge>}
+              {telegramStatus === 'fail' && <Badge className="bg-destructive/10 text-destructive gap-1 text-xs"><XCircle className="w-3 h-3" />{t('settings.telegramFailed')}</Badge>}
+              {webhookStatus === 'ok' && <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 gap-1 text-xs"><Link2 className="w-3 h-3" />{t('settings.webhookActive')}</Badge>}
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <Button type="submit" disabled={savingTelegram}><Save className="w-4 h-4 mr-1.5" />{savingTelegram ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+                  <Button type="button" variant="outline" disabled={testingTelegram} onClick={onTestTelegram}>
+                    <Send className="w-4 h-4 mr-1.5" />{testingTelegram ? 'กำลังทดสอบ...' : 'ทดสอบ + เมนู'}
+                  </Button>
+                  <Button type="button" variant="outline" disabled={registeringWebhook} onClick={onRegisterWebhook}>
+                    <Link2 className="w-4 h-4 mr-1.5" />{registeringWebhook ? 'กำลังลงทะเบียน...' : 'ตั้งค่า Webhook'}
+                  </Button>
+```
+New String: ```
+                  <Button type="submit" disabled={savingTelegram}><Save className="w-4 h-4 mr-1.5" />{savingTelegram ? t('settings.saving') : t('settings.saveTelegram')}</Button>
+                  <Button type="button" variant="outline" disabled={testingTelegram} onClick={onTestTelegram}>
+                    <Send className="w-4 h-4 mr-1.5" />{testingTelegram ? t('settings.saving') : t('settings.testMenu')}
+                  </Button>
+                  <Button type="button" variant="outline" disabled={registeringWebhook} onClick={onRegisterWebhook}>
+                    <Link2 className="w-4 h-4 mr-1.5" />{registeringWebhook ? t('settings.registeringWebhook') : t('settings.registerWebhook')}
+                  </Button>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <p className="text-xs font-medium text-foreground">Webhook URL:</p>
+```
+New String: ```
+                  <p className="text-xs font-medium text-foreground">{t('settings.webhookUrl')}</p>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0"
+                      onClick={() => { navigator.clipboard.writeText(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`); toast.success('คัดลอก URL แล้ว'); }}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+```
+New String: ```
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0"
+                      onClick={() => { navigator.clipboard.writeText(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`); toast.success(t('settings.urlCopied')); }}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" />ป้ายสถานะ / Badges (Discord-style)
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">สร้าง Badge แบบกำหนดเองได้ไม่จำกัด สามารถมอบหลาย Badge ให้ผู้ใช้คนเดียวได้</p>
+```
+New String: ```
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" />{t('settings.badgeTitle')}
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">{t('settings.badgeSubtitle')}</p>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+            <Button size="sm" onClick={openBadgeCreate}><Plus className="w-4 h-4 mr-1" />สร้าง Badge</Button>
+```
+New String: ```
+            <Button size="sm" onClick={openBadgeCreate}><Plus className="w-4 h-4 mr-1" />{t('settings.createBadge')}</Button>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <TableHead className="whitespace-nowrap">Badge</TableHead>
+                  <TableHead className="whitespace-nowrap">ชื่อ</TableHead>
+                  <TableHead className="whitespace-nowrap">คำอธิบาย</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">ลำดับ</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">จัดการ</TableHead>
+```
+New String: ```
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeName')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeNameCol')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeDesc')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeOrder')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeManage')}</TableHead>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
+                      ยังไม่มี Badge กดปุ่ม "สร้าง Badge" เพื่อเริ่มต้น
+                    </TableCell>
+```
+New String: ```
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
+                      {t('settings.noBadges')}
+                    </TableCell>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+            <CardTitle className="text-base font-semibold">หมวดหมู่สินค้า</CardTitle>
+            <Button size="sm" onClick={openCatCreate}><Plus className="w-4 h-4 mr-1" />เพิ่ม</Button>
+```
+New String: ```
+            <CardTitle className="text-base font-semibold">{t('settings.categoriesTitle')}</CardTitle>
+            <Button size="sm" onClick={openCatCreate}><Plus className="w-4 h-4 mr-1" />{t('settings.addCategory')}</Button>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+FileReadAction(path='/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx', start=0, end=-1, thought='', action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[540, 760], user_hidden=False)
+</action>
+<observation>
+[Read from /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx is successful.]
+Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx:
+   540             <Table>
+   541               <TableHeader>
+   542                 <TableRow>
+   543                   <TableHead className="whitespace-nowrap">ชื่อหมวดหมู่</TableHead>
+   544                   <TableHead className="whitespace-nowrap">คำอธิบาย</TableHead>
+   545                   <TableHead className="whitespace-nowrap text-right">ลำดับ</TableHead>
+   546                   <TableHead className="whitespace-nowrap text-right">จัดการ</TableHead>
+   547                 </TableRow>
+   548               </TableHeader>
+   549               <TableBody>
+   550                 {loadingCats ? (
+   551                   [...Array(3)].map((_, i) => (
+   552                     <TableRow key={i}>{[...Array(4)].map((_, j) => <TableCell key={j}><Skeleton className="h-5 bg-muted" /></TableCell>)}</TableRow>
+   553                   ))
+   554                 ) : categories.length === 0 ? (
+   555                   <TableRow>
+   556                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">ยังไม่มีหมวดหมู่</TableCell>
+   557                   </TableRow>
+   558                 ) : categories.map(cat => (
+   559                   <TableRow key={cat.id} className="hover:bg-muted/30">
+   560                     <TableCell className="whitespace-nowrap font-medium text-sm text-foreground">{cat.name}</TableCell>
+   561                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{cat.description || '-'}</TableCell>
+   562                     <TableCell className="whitespace-nowrap text-right text-sm text-muted-foreground">{cat.sort_order}</TableCell>
+   563                     <TableCell className="whitespace-nowrap text-right">
+   564                       <div className="flex items-center justify-end gap-1">
+   565                         <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => openCatEdit(cat)}><Pencil className="w-3.5 h-3.5" /></Button>
+   566                         <Button variant="ghost" size="icon" className="w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteCat(cat)}><Trash2 className="w-3.5 h-3.5" /></Button>
+   567                       </div>
+   568                     </TableCell>
+   569                   </TableRow>
+   570                 ))}
+   571               </TableBody>
+   572             </Table>
+   573           </div>
+   574         </CardContent>
+   575       </Card>
+   576 
+   577       {/* Badge Form Dialog */}
+   578       <Dialog open={showBadgeForm} onOpenChange={v => { if (!v) setShowBadgeForm(false); }}>
+   579         <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
+   580           <DialogHeader>
+   581             <DialogTitle className="flex items-center gap-2">
+   582               <Tag className="w-5 h-5" />{editBadge ? 'แก้ไข Badge' : 'สร้าง Badge ใหม่'}
+   583             </DialogTitle>
+   584           </DialogHeader>
+   585           {/* Preview */}
+   586           <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+   587             <span className="text-xs text-muted-foreground">ตัวอย่าง:</span>
+   588             <span
+   589               className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium"
+   590               style={{ backgroundColor: (watchColor || '#6366f1') + '33', color: watchColor || '#6366f1', border: `1px solid ${watchColor || '#6366f1'}66` }}
+   591             >
+   592               {watchEmoji || '🏷️'} {watchName || 'Badge Name'}
+   593             </span>
+   594           </div>
+   595           <Form {...badgeForm}>
+   596             <form onSubmit={badgeForm.handleSubmit(onSaveBadge)} className="space-y-4">
+   597               <div className="grid grid-cols-3 gap-3">
+   598                 <FormField control={badgeForm.control} name="emoji" render={({ field }) => (
+   599                   <FormItem>
+   600                     <FormLabel className="text-sm font-normal">Emoji</FormLabel>
+   601                     <FormControl><Input {...field} placeholder="🏷️" className="text-center text-lg" maxLength={4} /></FormControl>
+   602                     <FormMessage />
+   603                   </FormItem>
+   604                 )} />
+   605                 <FormField control={badgeForm.control} name="name" render={({ field }) => (
+   606                   <FormItem className="col-span-2">
+   607                     <FormLabel className="text-sm font-normal">ชื่อ Badge *</FormLabel>
+   608                     <FormControl><Input {...field} placeholder="เช่น Senior Staff, MVP" /></FormControl>
+   609                     <FormMessage />
+   610                   </FormItem>
+   611                 )} />
+   612               </div>
+   613               <FormField control={badgeForm.control} name="color" render={({ field }) => (
+   614                 <FormItem>
+   615                   <FormLabel className="text-sm font-normal">สี Badge</FormLabel>
+   616                   <div className="space-y-2">
+   617                     {/* Preset colors */}
+   618                     <div className="flex flex-wrap gap-2">
+   619                       {PRESET_COLORS.map(c => (
+   620                         <button
+   621                           key={c} type="button"
+   622                           onClick={() => badgeForm.setValue('color', c)}
+   623                           className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110"
+   624                           style={{ backgroundColor: c, borderColor: field.value === c ? 'hsl(var(--foreground))' : 'transparent' }}
+   625                         />
+   626                       ))}
+   627                     </div>
+   628                     <FormControl>
+   629                       <div className="flex items-center gap-2">
+   630                         <input type="color" value={field.value} onChange={e => field.onChange(e.target.value)}
+   631                           className="w-10 h-10 rounded cursor-pointer border border-border bg-transparent p-0.5" />
+   632                         <Input {...field} placeholder="#6366f1" className="w-32 font-mono text-sm" />
+   633                       </div>
+   634                     </FormControl>
+   635                   </div>
+   636                   <FormMessage />
+   637                 </FormItem>
+   638               )} />
+   639               {/* Preset emojis */}
+   640               <div>
+   641                 <p className="text-sm font-normal mb-2">Emoji ยอดนิยม</p>
+   642                 <div className="flex flex-wrap gap-1.5">
+   643                   {PRESET_EMOJIS.map(e => (
+   644                     <button key={e} type="button" onClick={() => badgeForm.setValue('emoji', e)}
+   645                       className={`text-lg w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-muted ${badgeForm.watch('emoji') === e ? 'bg-muted ring-2 ring-primary' : ''}`}>
+   646                       {e}
+   647                     </button>
+   648                   ))}
+   649                 </div>
+   650               </div>
+   651               <FormField control={badgeForm.control} name="description" render={({ field }) => (
+   652                 <FormItem>
+   653                   <FormLabel className="text-sm font-normal">คำอธิบาย</FormLabel>
+   654                   <FormControl><Input {...field} placeholder="คำอธิบาย Badge นี้" /></FormControl>
+   655                   <FormMessage />
+   656                 </FormItem>
+   657               )} />
+   658               <FormField control={badgeForm.control} name="sort_order" render={({ field }) => (
+   659                 <FormItem>
+   660                   <FormLabel className="text-sm font-normal">ลำดับการแสดงผล</FormLabel>
+   661                   <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
+   662                   <FormMessage />
+   663                 </FormItem>
+   664               )} />
+   665               <DialogFooter className="gap-2 pt-2">
+   666                 <Button type="button" variant="outline" onClick={() => setShowBadgeForm(false)} disabled={savingBadge}>ยกเลิก</Button>
+   667                 <Button type="submit" disabled={savingBadge}>{savingBadge ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+   668               </DialogFooter>
+   669             </form>
+   670           </Form>
+   671         </DialogContent>
+   672       </Dialog>
+   673 
+   674       {/* Category Form Dialog */}
+   675       <Dialog open={showCatForm} onOpenChange={v => { if (!v) setShowCatForm(false); }}>
+   676         <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-sm">
+   677           <DialogHeader><DialogTitle>{editCat ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่'}</DialogTitle></DialogHeader>
+   678           <Form {...catForm}>
+   679             <form onSubmit={catForm.handleSubmit(onSaveCat)} className="space-y-4">
+   680               <FormField control={catForm.control} name="name" render={({ field }) => (
+   681                 <FormItem>
+   682                   <FormLabel className="text-sm font-normal">ชื่อหมวดหมู่ *</FormLabel>
+   683                   <FormControl><Input {...field} placeholder="เช่น อาหาร, เครื่องดื่ม" autoFocus /></FormControl>
+   684                   <FormMessage />
+   685                 </FormItem>
+   686               )} />
+   687               <FormField control={catForm.control} name="description" render={({ field }) => (
+   688                 <FormItem>
+   689                   <FormLabel className="text-sm font-normal">คำอธิบาย</FormLabel>
+   690                   <FormControl><Input {...field} placeholder="คำอธิบายเพิ่มเติม" /></FormControl>
+   691                   <FormMessage />
+   692                 </FormItem>
+   693               )} />
+   694               <FormField control={catForm.control} name="sort_order" render={({ field }) => (
+   695                 <FormItem>
+   696                   <FormLabel className="text-sm font-normal">ลำดับการแสดงผล</FormLabel>
+   697                   <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
+   698                   <FormMessage />
+   699                 </FormItem>
+   700               )} />
+   701               <DialogFooter className="gap-2">
+   702                 <Button type="button" variant="outline" onClick={() => setShowCatForm(false)} disabled={savingCat}>ยกเลิก</Button>
+   703                 <Button type="submit" disabled={savingCat}>{savingCat ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+   704               </DialogFooter>
+   705             </form>
+   706           </Form>
+   707         </DialogContent>
+   708       </Dialog>
+   709 
+   710       {/* Delete Badge Confirm */}
+   711       <AlertDialog open={!!deleteBadge} onOpenChange={v => { if (!v) setDeleteBadge(null); }}>
+   712         <AlertDialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
+   713           <AlertDialogHeader>
+   714             <AlertDialogTitle>ลบ Badge</AlertDialogTitle>
+   715             <AlertDialogDescription>
+   716               ต้องการลบ Badge <strong>{deleteBadge?.emoji} {deleteBadge?.name}</strong>?<br />
+   717               Badge นี้จะถูกถอดออกจากผู้ใช้ทุกคนที่มีอยู่
+   718             </AlertDialogDescription>
+   719           </AlertDialogHeader>
+   720           <AlertDialogFooter>
+   721             <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+   722             <AlertDialogAction onClick={handleDeleteBadge} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ลบ Badge</AlertDialogAction>
+   723           </AlertDialogFooter>
+   724         </AlertDialogContent>
+   725       </AlertDialog>
+   726 
+   727       {/* Delete Category Confirm */}
+   728       <AlertDialog open={!!deleteCat} onOpenChange={v => { if (!v) setDeleteCat(null); }}>
+   729         <AlertDialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
+   730           <AlertDialogHeader>
+   731             <AlertDialogTitle>ลบหมวดหมู่</AlertDialogTitle>
+   732             <AlertDialogDescription>
+   733               ต้องการลบหมวดหมู่ <strong>{deleteCat?.name}</strong>?<br />
+   734               สินค้าในหมวดหมู่นี้จะถูกย้ายไปหมวดหมู่ "ไม่ระบุ"
+   735             </AlertDialogDescription>
+   736           </AlertDialogHeader>
+   737           <AlertDialogFooter>
+   738             <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+   739             <AlertDialogAction onClick={handleDeleteCat} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ลบหมวดหมู่</AlertDialogAction>
+   740           </AlertDialogFooter>
+   741         </AlertDialogContent>
+   742       </AlertDialog>
+   743     </div>
+   744   );
+   745 }
+   746 
+
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: Now finish wiring the remaining SettingsPage dialog strings, then RolesPage and FraudMonitorPage in parallel:
+Command: str_replace
+Old String: ```
+                  <TableHead className="whitespace-nowrap">ชื่อหมวดหมู่</TableHead>
+                  <TableHead className="whitespace-nowrap">คำอธิบาย</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">ลำดับ</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">จัดการ</TableHead>
+```
+New String: ```
+                  <TableHead className="whitespace-nowrap">{t('settings.categoryName')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeDesc')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeOrder')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeManage')}</TableHead>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">ยังไม่มีหมวดหมู่</TableCell>
+```
+New String: ```
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">{t('settings.noCategories')}</TableCell>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+          <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5" />{editBadge ? 'แก้ไข Badge' : 'สร้าง Badge ใหม่'}
+            </DialogTitle>
+```
+New String: ```
+          <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5" />{editBadge ? t('settings.editBadgeTitle') : t('settings.newBadge')}
+            </DialogTitle>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+            <span className="text-xs text-muted-foreground">ตัวอย่าง:</span>
+```
+New String: ```
+            <span className="text-xs text-muted-foreground">{t('settings.preview')}</span>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <FormLabel className="text-sm font-normal">Emoji</FormLabel>
+```
+New String: ```
+                  <FormLabel className="text-sm font-normal">{t('settings.emojiLabel')}</FormLabel>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <FormLabel className="text-sm font-normal">ชื่อ Badge *</FormLabel>
+```
+New String: ```
+                  <FormLabel className="text-sm font-normal">{t('settings.badgeNameCol')} *</FormLabel>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <FormLabel className="text-sm font-normal">สี Badge</FormLabel>
+```
+New String: ```
+                  <FormLabel className="text-sm font-normal">{t('settings.badgeColorLabel')}</FormLabel>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                <p className="text-sm font-normal mb-2">Emoji ยอดนิยม</p>
+```
+New String: ```
+                <p className="text-sm font-normal mb-2">{t('settings.presetEmojis')}</p>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <FormLabel className="text-sm font-normal">ลำดับการแสดงผล</FormLabel>
+                  <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter className="gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setShowBadgeForm(false)} disabled={savingBadge}>ยกเลิก</Button>
+                <Button type="submit" disabled={savingBadge}>{savingBadge ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+              </DialogFooter>
+```
+New String: ```
+                  <FormLabel className="text-sm font-normal">{t('settings.displayOrder')}</FormLabel>
+                  <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter className="gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setShowBadgeForm(false)} disabled={savingBadge}>{t('common.cancel')}</Button>
+                <Button type="submit" disabled={savingBadge}>{savingBadge ? t('settings.saving') : t('common.save')}</Button>
+              </DialogFooter>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+          <DialogHeader><DialogTitle>{editCat ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่'}</DialogTitle></DialogHeader>
+```
+New String: ```
+          <DialogHeader><DialogTitle>{editCat ? t('settings.editCategoryTitle') : t('settings.addCategoryTitle')}</DialogTitle></DialogHeader>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <FormLabel className="text-sm font-normal">ชื่อหมวดหมู่ *</FormLabel>
+                  <FormControl><Input {...field} placeholder="เช่น อาหาร, เครื่องดื่ม" autoFocus /></FormControl>
+```
+New String: ```
+                  <FormLabel className="text-sm font-normal">{t('settings.categoryName')}</FormLabel>
+                  <FormControl><Input {...field} placeholder={t('settings.categoryNamePlaceholder')} autoFocus /></FormControl>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+                  <FormLabel className="text-sm font-normal">ลำดับการแสดงผล</FormLabel>
+                  <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowCatForm(false)} disabled={savingCat}>ยกเลิก</Button>
+                <Button type="submit" disabled={savingCat}>{savingCat ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+              </DialogFooter>
+```
+New String: ```
+                  <FormLabel className="text-sm font-normal">{t('settings.displayOrder')}</FormLabel>
+                  <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowCatForm(false)} disabled={savingCat}>{t('common.cancel')}</Button>
+                <Button type="submit" disabled={savingCat}>{savingCat ? t('settings.saving') : t('common.save')}</Button>
+              </DialogFooter>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+            <AlertDialogTitle>ลบ Badge</AlertDialogTitle>
+            <AlertDialogDescription>
+              ต้องการลบ Badge <strong>{deleteBadge?.emoji} {deleteBadge?.name}</strong>?<br />
+              Badge นี้จะถูกถอดออกจากผู้ใช้ทุกคนที่มีอยู่
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBadge} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ลบ Badge</AlertDialogAction>
+          </AlertDialogFooter>
+```
+New String: ```
+            <AlertDialogTitle>{t('settings.deleteBadgeTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('settings.deleteBadgeDesc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBadge} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('common.delete')}</AlertDialogAction>
+          </AlertDialogFooter>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+            <AlertDialogTitle>ลบหมวดหมู่</AlertDialogTitle>
+            <AlertDialogDescription>
+              ต้องการลบหมวดหมู่ <strong>{deleteCat?.name}</strong>?<br />
+              สินค้าในหมวดหมู่นี้จะถูกย้ายไปหมวดหมู่ "ไม่ระบุ"
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCat} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ลบหมวดหมู่</AlertDialogAction>
+          </AlertDialogFooter>
+```
+New String: ```
+            <AlertDialogTitle>{t('settings.deleteCategory')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('settings.deleteCategoryDesc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCat} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('common.delete')}</AlertDialogAction>
+          </AlertDialogFooter>
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/SettingsPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx]
+Thought: Now wire RolesPage and FraudMonitorPage in parallel:
+Command: str_replace
+Old String: ```
+export default function RolesPage() {
+  const { profile } = useAuth();
+```
+New String: ```
+export default function RolesPage() {
+  const { t } = useTranslation();
+  const { profile } = useAuth();
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+      if (error) { toast.error('แก้ไขยศไม่สำเร็จ: ' + error.message); return; }
+      toast.success('แก้ไขยศเรียบร้อย');
+    } else {
+      const { error } = await supabase
+        .from('roles')
+        .insert({ name: values.name, color: values.color, permissions: values.permissions, store_id: profile?.store_id ?? null });
+      if (error) { toast.error('สร้างยศไม่สำเร็จ: ' + error.message); return; }
+      toast.success('สร้างยศใหม่เรียบร้อย');
+```
+New String: ```
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.editSuccess'));
+    } else {
+      const { error } = await supabase
+        .from('roles')
+        .insert({ name: values.name, color: values.color, permissions: values.permissions, store_id: profile?.store_id ?? null });
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.createSuccess'));
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+    if ((userCounts[deleteTarget.id] || 0) > 0) {
+      toast.error('ไม่สามารถลบยศที่มีพนักงานอยู่ได้ กรุณาเปลี่ยนยศพนักงานก่อน');
+      setDeleteTarget(null);
+      return;
+    }
+    const { error } = await supabase.from('roles').delete().eq('id', deleteTarget.id);
+    if (error) { toast.error('ลบยศไม่สำเร็จ: ' + error.message); return; }
+    toast.success('ลบยศเรียบร้อย');
+```
+New String: ```
+    if ((userCounts[deleteTarget.id] || 0) > 0) {
+      toast.error(t('roles.deleteHasUsers'));
+      setDeleteTarget(null);
+      return;
+    }
+    const { error } = await supabase.from('roles').delete().eq('id', deleteTarget.id);
+    if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+    toast.success(t('roles.deleteSuccess'));
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+export default function FraudMonitorPage() {
+  const { profile } = useAuth();
+```
+New String: ```
+export default function FraudMonitorPage() {
+  const { t } = useTranslation();
+  const { profile } = useAuth();
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+    if (error) { toast.error('อัปเดตไม่สำเร็จ'); return; }
+```
+New String: ```
+    if (error) { toast.error(t('common.error')); return; }
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+    toast.success('ทำเครื่องหมายตรวจสอบแล้ว');
+```
+New String: ```
+    toast.success(t('common.updated'));
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx has been edited.
+
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+THOUGHT: Now check what locale keys are needed for roles and then run lint:
+COMMAND:
+grep -n "t('roles\." /workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
+  "exit_code": 0,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 0.]"
+})**
+--BEGIN AGENT OBSERVATION--
+218:      toast.success(t('roles.editSuccess'));
+224:      toast.success(t('roles.createSuccess'));
+233:      toast.error(t('roles.deleteHasUsers'));
+239:    toast.success(t('roles.deleteSuccess'));
+[The command completed with exit code 0.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+COMMAND:
+grep -n "t('common\." /workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx; grep -n "t('common\.updated')" /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=1, metadata={
+  "exit_code": 1,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 1.]"
+})**
+--BEGIN AGENT OBSERVATION--
+174:    if (error) { toast.error(t('common.error')); return; }
+177:    toast.success(t('common.updated'));
+[The command completed with exit code 1.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+COMMAND:
+grep -n "common\.\|roles\." /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts | grep -E "updated|cancel|save|delete|error|roles\." | head -30
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
+  "exit_code": 0,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 0.]"
+})**
+--BEGIN AGENT OBSERVATION--
+
+[The command completed with exit code 0.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+COMMAND:
+grep -n "common:\|roles:" /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts; grep -n "updated\|cancel\|save\b\|delete\b\|error\b\|editSuccess\|createSuccess\|deleteSuccess\|deleteHasUsers" /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
+  "exit_code": 0,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 0.]"
+})**
+--BEGIN AGENT OBSERVATION--
+3:  common: {
+85:    roles: 'Roles',
+373:  roles: {
+407:      manage_roles: 'Manage Roles',
+4:    save: 'Save',
+5:    cancel: 'Cancel',
+6:    delete: 'Delete',
+14:    error: 'Error',
+192:    deleteSuccess: 'Product deleted successfully',
+208:    deleteFailHasTransaction: 'Cannot delete: product has sales records',
+250:    updated: 'Stock updated for',
+362:    deleteSuccess: 'User deleted successfully',
+381:    systemRole: 'System Role (cannot delete)',
+384:    deleteSuccess: 'Role deleted successfully',
+386:    cannotDeleteSystem: 'Cannot delete system role',
+387:    cannotDeleteHasUsers: 'Cannot delete role with active users',
+512:    saveFirst: 'Please save store info first',
+549:    categoryEdited: 'Category updated',
+551:    categoryDeleteFailed: 'Cannot delete: category has products',
+553:    badgeEdited: 'Badge updated',
+555:    badgeDeleteFailed: 'Cannot delete badge',
+[The command completed with exit code 0.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+COMMAND:
+grep -n "editSuccess\|createSuccess\|deleteHasUsers\|deleteSuccess" /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts | grep "roles\."
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=1, metadata={
+  "exit_code": 1,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 1.]"
+})**
+--BEGIN AGENT OBSERVATION--
+
+[The command completed with exit code 1.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
+</observation>
+<action>
+FileReadAction(path='/workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts', start=0, end=-1, thought='', action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[373, 415], user_hidden=False)
+</action>
+<observation>
+[Read from /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts is successful.]
+Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts:
+   373   roles: {
+   374     title: 'Role Management',
+   375     addRole: 'Create Role',
+   376     editRole: 'Edit Role',
+   377     deleteRole: 'Delete Role',
+   378     roleName: 'Role Name',
+   379     roleColor: 'Role Color',
+   380     permissionsLabel: 'Permissions',
+   381     systemRole: 'System Role (cannot delete)',
+   382     usersWithRole: 'Users',
+   383     saveSuccess: 'Role saved successfully',
+   384     deleteSuccess: 'Role deleted successfully',
+   385     deleteConfirm: 'Confirm Delete Role',
+   386     cannotDeleteSystem: 'Cannot delete system role',
+   387     cannotDeleteHasUsers: 'Cannot delete role with active users',
+   388     permissionGroups: {
+   389       sales: 'Sales',
+   390       products: 'Products & Inventory',
+   391       management: 'Management',
+   392       security: 'Security',
+   393     },
+   394     permissions: {
+   395       view_dashboard: 'View Dashboard',
+   396       view_reports: 'View Reports',
+   397       view_profit: 'View Profit',
+   398       view_cost: 'View Cost',
+   399       manage_products: 'Manage Products',
+   400       manage_inventory: 'Manage Inventory',
+   401       manage_categories: 'Manage Categories',
+   402       process_sales: 'Process Sales',
+   403       void_transactions: 'Void Transactions',
+   404       view_transactions: 'View Transactions',
+   405       view_all_transactions: 'View All Transactions',
+   406       manage_users: 'Manage Users',
+   407       manage_roles: 'Manage Roles',
+   408       manage_settings: 'Manage Settings',
+   409       view_audit_log: 'View Audit Log',
+   410       view_fraud_alerts: 'View Fraud Alerts',
+   411       issue_warnings: 'Issue Warnings',
+   412     },
+   413   },
+   414 
+   415   fraud: {
+
+
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+COMMAND:
+grep -n "common\.updated" /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts; grep -n "roles\." /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts | tail -20
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
+  "exit_code": 0,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 0.]"
+})**
+--BEGIN AGENT OBSERVATION--
+
+[The command completed with exit code 0.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
+</observation>
+<action>
+AgentThinkAction(thought="The RolesPage uses:\n- t('roles.editSuccess') → doesn't exist, but t('roles.saveSuccess') does\n- t('roles.createSuccess') → doesn't exist, but t('roles.saveSuccess') does\n- t('roles.deleteHasUsers') → doesn't exist, but t('roles.cannotDeleteHasUsers') does\n- t('roles.deleteSuccess') → EXISTS at line 384\n- t('common.error') → EXISTS at line 14\n- t('common.updated') → does NOT exist\n\nFraudMonitorPage uses t('common.updated') which doesn't exist.\n\nFix: remap the RolesPage calls to existing keys, and add common.updated to all 4 locale files, OR remap FraudMonitorPage to use a different existing key.\n\nBest approach: \n1. Remap RolesPage t() calls to existing locale keys\n2. Add common.updated to all 4 locale files (simplest - one key in common)\n", action=<ActionType.THINK: 'think'>)
+</action>
+<observation>
+AgentThinkObservation(content='Your thought has been logged.', observation=<ObservationType.THINK: 'think'>)
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx]
+Thought: The RolesPage uses keys that don't exist — remap them to existing ones, and add `common.updated` to all 4 locales, all in parallel:
+Command: str_replace
+Old String: ```
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.editSuccess'));
+    } else {
+      const { error } = await supabase
+        .from('roles')
+        .insert({ name: values.name, color: values.color, permissions: values.permissions, store_id: profile?.store_id ?? null });
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.createSuccess'));
+```
+New String: ```
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.saveSuccess'));
+    } else {
+      const { error } = await supabase
+        .from('roles')
+        .insert({ name: values.name, color: values.color, permissions: values.permissions, store_id: profile?.store_id ?? null });
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.saveSuccess'));
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+    if ((userCounts[deleteTarget.id] || 0) > 0) {
+      toast.error(t('roles.deleteHasUsers'));
+      setDeleteTarget(null);
+      return;
+    }
+    const { error } = await supabase.from('roles').delete().eq('id', deleteTarget.id);
+    if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+    toast.success(t('roles.deleteSuccess'));
+```
+New String: ```
+    if ((userCounts[deleteTarget.id] || 0) > 0) {
+      toast.error(t('roles.cannotDeleteHasUsers'));
+      setDeleteTarget(null);
+      return;
+    }
+    const { error } = await supabase.from('roles').delete().eq('id', deleteTarget.id);
+    if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+    toast.success(t('roles.deleteSuccess'));
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/RolesPage.tsx has been edited.
+
+</observation>
+<action>
+**FileEditAction**
+Path: [/workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx]
+Thought: 
+Command: str_replace
+Old String: ```
+    toast.success(t('common.updated'));
+```
+New String: ```
+    toast.success(t('common.success'));
+```
+
+</action>
+<observation>
+The file /workspace/app-ca8n8duf25mp/src/pages/FraudMonitorPage.tsx has been edited.
+
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+COMMAND:
+grep -n "common\.success\b" /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=1, metadata={
+  "exit_code": 1,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 1.]"
+})**
+--BEGIN AGENT OBSERVATION--
+
+[The command completed with exit code 1.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
+</observation>
+<action>
+FileReadAction(path='/workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts', start=0, end=-1, thought="`common.success` doesn't exist either. Check what common keys are available and add missing ones, then run lint — all in parallel:", action=<ActionType.READ: 'read'>, security_risk=None, impl_source=<FileReadSource.OH_ACI: 'oh_aci'>, view_range=[1, 85], user_hidden=False)
+</action>
+<observation>
+[Read from /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts is successful.]
+Here's the result of running `cat -n` on the file: /workspace/app-ca8n8duf25mp/src/i18n/locales/en.ts:
+     1 // English
+     2 const en = {
+     3   common: {
+     4     save: 'Save',
+     5     cancel: 'Cancel',
+     6     delete: 'Delete',
+     7     edit: 'Edit',
+     8     add: 'Add',
+     9     search: 'Search',
+    10     confirm: 'Confirm',
+    11     close: 'Close',
+    12     loading: 'Loading...',
+    13     noData: 'No data',
+    14     error: 'Error',
+    15     success: 'Success',
+    16     warning: 'Warning',
+    17     all: 'All',
+    18     active: 'Active',
+    19     inactive: 'Inactive',
+    20     yes: 'Yes',
+    21     no: 'No',
+    22     view: 'View',
+    23     create: 'Create',
+    24     update: 'Update',
+    25     refresh: 'Refresh',
+    26     filter: 'Filter',
+    27     export: 'Export',
+    28     print: 'Print',
+    29     back: 'Back',
+    30     next: 'Next',
+    31     previous: 'Previous',
+    32     required: 'Required',
+    33     optional: 'Optional',
+    34     actions: 'Actions',
+    35     status: 'Status',
+    36     name: 'Name',
+    37     description: 'Description',
+    38     date: 'Date',
+    39     time: 'Time',
+    40     total: 'Total',
+    41     baht: 'THB',
+    42     items: 'items',
+    43     piece: 'pcs',
+    44     unit: 'unit',
+    45     noPermission: 'You do not have permission',
+    46     test: 'Test',
+    47     enable: 'Enable',
+    48     disable: 'Disable',
+    49     noDataInRange: 'No data for selected period',
+    50     pieces: 'pcs',
+    51     from: 'From',
+    52     to: 'To',
+    53   },
+    54 
+    55   login: {
+    56     title: 'Login',
+    57     subtitle: 'POS Point of Sale System',
+    58     username: 'Username',
+    59     password: 'Password',
+    60     usernamePlaceholder: 'Enter username',
+    61     passwordPlaceholder: 'Enter password',
+    62     loginButton: 'Login',
+    63     loggingIn: 'Logging in...',
+    64     invalidCredentials: 'Invalid username or password',
+    65     accountSuspended: 'This account is suspended (Red Card). Please contact administrator.',
+    66     storeClosed: 'Your store is temporarily closed. Please contact administrator.',
+    67     loginSuccess: 'Login successful',
+    68     selectLanguage: 'Select Language',
+    69     agreePrefix: 'I agree to the',
+    70     termsOfService: 'Terms of Service',
+    71     agreeAnd: 'and',
+    72     privacyPolicy: 'Privacy Policy',
+    73     systemName: 'Point of Sale System',
+    74     copyright: 'POS Point of Sale System',
+    75   },
+    76 
+    77   nav: {
+    78     dashboard: 'Dashboard',
+    79     pos: 'POS',
+    80     products: 'Products',
+    81     inventory: 'Inventory',
+    82     transactions: 'Transactions',
+    83     reports: 'Reports',
+    84     users: 'Users',
+    85     roles: 'Roles',
+
+
+</observation>
+<action>
+**CmdRunAction (source=EventSource.AGENT, is_input=False)**
+COMMAND:
+cd /workspace/app-ca8n8duf25mp && npm run lint 2>&1 | head -80
+</action>
+<observation>
+**CmdOutputObservation (source=EventSource.AGENT, exit code=0, metadata={
+  "exit_code": 0,
+  "pid": -1,
+  "username": null,
+  "hostname": null,
+  "working_dir": "/workspace/app-ca8n8duf25mp",
+  "py_interpreter_path": null,
+  "prefix": "",
+  "suffix": "\n[The command completed with exit code 0.]"
+})**
+--BEGIN AGENT OBSERVATION--
+src/i18n/locales/lo.ts(481,1): error TS1128: Declaration or statement expected.
+src/i18n/locales/zh.ts(481,1): error TS1128: Declaration or statement expected.
+src/i18n/locales/lo.ts:178:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Const declarations must have an initialized value.
+  
+    176 │   },
+    177 │ 
+  > 178 │   products: {
+        │   ^^^^^^^^
+    179 │     title: 'ຈ�ດການສ�ນຄ�າ',
+    180 │     addProduct: 'ເພ��ມສ�ນຄ�າ',
+  
+  i This variable needs to be initialized.
+  
+
+src/i18n/locales/lo.ts:222:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Const declarations must have an initialized value.
+  
+    220 │   },
+    221 │ 
+  > 222 │   inventory: {
+        │   ^^^^^^^^^
+    223 │     title: 'ຈ�ດການສາງສ�ນຄ�າ',
+    224 │     adjustStock: 'ປ�ບສາງ',
+  
+  i This variable needs to be initialized.
+  
+
+src/i18n/locales/lo.ts:258:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Const declarations must have an initialized value.
+  
+    256 │   },
+    257 │ 
+  > 258 │   transactions: {
+        │   ^^^^^^^^^^^^
+    259 │     title: 'ປະຫວ�ດການຂາຍ',
+    260 │     orderNumber: 'ເລກອ�ເດ��',
+  
+  i This variable needs to be initialized.
+  
+
+src/i18n/locales/lo.ts:305:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Const declarations must have an initialized value.
+  
+    303 │   },
+    304 │ 
+  > 305 │   reports: {
+        │   ^^^^^^^
+    306 │     title: 'ລາຍງານ',
+    307 │     salesReport: 'ລາຍງານຍອດຂາຍ',
+  
+  i This variable needs to be initialized.
+  
+
+src/i18n/locales/lo.ts:342:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Const declarations must have an initialized value.
+  
+    340 │   },
+    341 │ 
+  > 342 │   users: {
+        │   ^^^^^
+    343 │     title: 'ຈ�ດການຜ��ໃຊ�ງານ',
+    344 │     addUser: 'ເພ��ມຜ��ໃຊ�',
+  
+  i This variable needs to be initialized.
+  
+
+src/i18n/locales/lo.ts:376:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Const declarations must have an initialized value.
+  
+    374 │   },
+    375 │ 
+  > 376 │   roles: {
+        │   ^^^^^
+[The command completed with exit code 0.]
+[Current working directory: /workspace/app-ca8n8duf25mp]
+--END AGENT OBSERVATION--
 </observation>
