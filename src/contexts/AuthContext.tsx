@@ -89,26 +89,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, applyProfile]);
 
   useEffect(() => {
-    // ใช้ onAuthStateChange เป็น single source of truth
-    // INITIAL_SESSION จะยิงทันทีพร้อม session จริง (รวมถึงกรณี token หมดอายุ)
+    // ใช้ onAuthStateChange เป็น single source of truth สำหรับ session ครั้งแรก
+    // SIGNED_IN จะถูกจัดการใน signInWithUsername โดยตรงเพื่อป้องกัน race condition
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
-        // token หมดอายุ หรือ logout — ล้าง state และกลับหน้า login
+      if (event === 'SIGNED_OUT') {
+        // logout หรือ token หมดอายุ — ล้าง state กลับหน้า login
         setUser(null);
         applyProfile(null);
         setLoading(false);
         return;
       }
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const p = await getProfile(session.user.id);
-        applyProfile(p);
-      } else {
-        applyProfile(null);
-      }
-      // loading=false หลังจาก INITIAL_SESSION หรือ SIGNED_IN ประมวลผลเสร็จ
-      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+      if (event === 'INITIAL_SESSION') {
+        // โหลด session ครั้งแรกตอนเปิดแอป
+        if (session?.user) {
+          setUser(session.user);
+          const p = await getProfile(session.user.id);
+          applyProfile(p);
+        } else {
+          setUser(null);
+          applyProfile(null);
+        }
         setLoading(false);
+        return;
+      }
+      if (event === 'TOKEN_REFRESHED' && session?.user) {
+        // token ต่ออายุสำเร็จ — อัปเดต user object ใหม่
+        setUser(session.user);
       }
     });
 
@@ -124,19 +130,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithUsername = async (username: string, password: string) => {
     try {
       const email = `${username}@miaoda.com`;
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: { session }, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
       // ดึงข้อมูลโปรไฟล์พร้อม store_id
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('warning_status, role, store_id')
+        .select('*, custom_role:roles(*), warning_status, role, store_id')
         .eq('username', username)
         .maybeSingle();
 
       // บล็อคใบแดง
       if (profileData?.warning_status === 'red_card') {
         await supabase.auth.signOut();
+        setUser(null);
+        applyProfile(null);
         return { error: new Error('ACCOUNT_SUSPENDED'), blocked: true };
       }
 
@@ -149,8 +157,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
         if (storeData && !storeData.is_active) {
           await supabase.auth.signOut();
+          setUser(null);
+          applyProfile(null);
           return { error: new Error('STORE_CLOSED'), storeClosed: true };
         }
+      }
+
+      // ✅ อัปเดต state ทันทีก่อน return — ป้องกัน race condition กับ navigate('/')
+      // onAuthStateChange(SIGNED_IN) จะยิงทีหลัง แต่ค่าจะเหมือนกัน
+      if (session?.user) {
+        setUser(session.user);
+        applyProfile(profileData as Profile | null);
+        setLoading(false);
       }
 
       return { error: null };
