@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   UserCog, Plus, Pencil, Trash2, Users, Shield, ChevronRight,
   ToggleLeft, ToggleRight, Copy, AlertTriangle,
@@ -141,6 +142,7 @@ const PRESET_COLORS = [
 ];
 
 export default function RolesPage() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,14 +214,14 @@ export default function RolesPage() {
         .from('roles')
         .update({ name: values.name, color: values.color, permissions: values.permissions, updated_at: new Date().toISOString() })
         .eq('id', editingRole.id);
-      if (error) { toast.error('แก้ไขยศไม่สำเร็จ: ' + error.message); return; }
-      toast.success('แก้ไขยศเรียบร้อย');
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.saveSuccess'));
     } else {
       const { error } = await supabase
         .from('roles')
         .insert({ name: values.name, color: values.color, permissions: values.permissions, store_id: profile?.store_id ?? null });
-      if (error) { toast.error('สร้างยศไม่สำเร็จ: ' + error.message); return; }
-      toast.success('สร้างยศใหม่เรียบร้อย');
+      if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+      toast.success(t('roles.saveSuccess'));
     }
     setIsCreateOpen(false);
     loadRoles();
@@ -228,13 +230,13 @@ export default function RolesPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     if ((userCounts[deleteTarget.id] || 0) > 0) {
-      toast.error('ไม่สามารถลบยศที่มีพนักงานอยู่ได้ กรุณาเปลี่ยนยศพนักงานก่อน');
+      toast.error(t('roles.cannotDeleteHasUsers'));
       setDeleteTarget(null);
       return;
     }
     const { error } = await supabase.from('roles').delete().eq('id', deleteTarget.id);
-    if (error) { toast.error('ลบยศไม่สำเร็จ: ' + error.message); return; }
-    toast.success('ลบยศเรียบร้อย');
+    if (error) { toast.error(t('common.error') + ': ' + error.message); return; }
+    toast.success(t('roles.deleteSuccess'));
     setDeleteTarget(null);
     loadRoles();
   };

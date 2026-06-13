@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CalendarDays, TrendingUp, TrendingDown, DollarSign, ShoppingBag, Package, ChevronDown, Camera } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,19 +25,11 @@ interface SalesSummary {
 }
 
 interface TopProduct { name: string; qty: number; revenue: number; }
-interface ChartPoint { label: string; ยอดขาย: number; กำไร: number; }
+interface ChartPoint { label: string; sales: number; profit: number; }
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 type PresetKey = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'custom';
-const PRESETS: { key: PresetKey; label: string }[] = [
-  { key: 'today', label: 'วันนี้' },
-  { key: 'yesterday', label: 'เมื่อวาน' },
-  { key: 'week', label: '7 วันล่าสุด' },
-  { key: 'month', label: 'เดือนนี้' },
-  { key: 'year', label: 'ปีนี้' },
-  { key: 'custom', label: 'กำหนดเอง' },
-];
 
 function toDateStr(d: Date) { return d.toISOString().split('T')[0]; }
 
@@ -76,7 +69,7 @@ function buildChartData(txArr: any[], from: string, to: string): ChartPoint[] {
       const sales = dayTx.reduce((s: number, t: any) => s + (t.total || 0), 0);
       const profit = dayTx.reduce((s: number, t: any) =>
         s + (Array.isArray(t.items) ? t.items : []).reduce((si: number, i: any) => si + ((i.unit_price - i.cost) * i.quantity), 0), 0);
-      points.push({ label: formatDate(new Date(ds), 'short'), ยอดขาย: Math.round(sales), กำไร: Math.round(profit) });
+      points.push({ label: formatDate(new Date(ds), 'short'), sales: Math.round(sales), profit: Math.round(profit) });
     }
   } else {
     // Monthly breakdown
@@ -87,11 +80,11 @@ function buildChartData(txArr: any[], from: string, to: string): ChartPoint[] {
       if (!months[mo]) {
         const d = new Date(mo + '-01');
         const label = d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' });
-        months[mo] = { label, ยอดขาย: 0, กำไร: 0 };
+        months[mo] = { label, sales: 0, profit: 0 };
       }
-      months[mo].ยอดขาย += Math.round(t.total || 0);
+      months[mo].sales += Math.round(t.total || 0);
       const profit = (Array.isArray(t.items) ? t.items : []).reduce((si: number, i: any) => si + ((i.unit_price - i.cost) * i.quantity), 0);
-      months[mo].กำไร += Math.round(profit);
+      months[mo].profit += Math.round(profit);
     });
     Object.keys(months).sort().forEach(k => points.push(months[k]));
   }
@@ -99,7 +92,17 @@ function buildChartData(txArr: any[], from: string, to: string): ChartPoint[] {
 }
 
 export default function ReportsPage() {
+  const { t } = useTranslation();
   const [preset, setPreset] = useState<PresetKey>('week');
+
+  const PRESETS: { key: PresetKey; label: string }[] = [
+    { key: 'today', label: t('reports.today') },
+    { key: 'yesterday', label: t('reports.yesterday') },
+    { key: 'week', label: t('dashboard.last7days') },
+    { key: 'month', label: t('reports.thisMonth') },
+    { key: 'year', label: t('reports.thisYear') },
+    { key: 'custom', label: t('reports.custom') },
+  ];
   const [customFrom, setCustomFrom] = useState(toDateStr(new Date()));
   const [customTo, setCustomTo] = useState(toDateStr(new Date()));
   const [showCustom, setShowCustom] = useState(false);
@@ -159,14 +162,14 @@ export default function ReportsPage() {
 
   const activeLabel = preset === 'custom'
     ? `${customFrom} — ${customTo}`
-    : PRESETS.find(p => p.key === preset)?.label ?? '7 วันล่าสุด';
+    : PRESETS.find(p => p.key === preset)?.label ?? t('dashboard.last7days');
 
   const statCards = [
-    { title: 'ยอดขายรวม', value: summary ? formatCurrency(summary.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
-    { title: 'จำนวนออเดอร์', value: summary ? `${summary.totalOrders} รายการ` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
-    { title: 'กำไรรวม', value: summary ? formatCurrency(summary.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
-    { title: 'อัตรากำไร', value: summary ? `${summary.profitMargin.toFixed(1)}%` : '-', icon: TrendingDown, color: 'text-warning', bg: 'bg-warning/10' },
-    { title: 'เฉลี่ย/ออเดอร์', value: summary ? formatCurrency(summary.avgOrderValue) : '-', icon: CalendarDays, color: 'text-chart-4', bg: 'bg-chart-4/10' },
+    { title: t('reports.totalSales'), value: summary ? formatCurrency(summary.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
+    { title: t('reports.totalOrders'), value: summary ? `${summary.totalOrders} ${t('common.items')}` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
+    { title: t('reports.totalProfit'), value: summary ? formatCurrency(summary.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
+    { title: t('reports.profitMargin'), value: summary ? `${summary.profitMargin.toFixed(1)}%` : '-', icon: TrendingDown, color: 'text-warning', bg: 'bg-warning/10' },
+    { title: t('dashboard.avgOrderValue'), value: summary ? formatCurrency(summary.avgOrderValue) : '-', icon: CalendarDays, color: 'text-chart-4', bg: 'bg-chart-4/10' },
   ];
 
   return (
@@ -174,18 +177,18 @@ export default function ReportsPage() {
       {/* Header + date range picker */}
       <div className="flex flex-col md:flex-row md:items-center gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground text-balance">รายงาน</h2>
+          <h2 className="text-xl font-bold text-foreground text-balance">{t('reports.title')}</h2>
           <p className="text-sm text-muted-foreground mt-0.5">{activeLabel}</p>
         </div>
         <div className="md:ml-auto flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => sendScreenshotToTelegram({ elementId: 'reports-capture', caption: `📈 รายงาน — ${activeLabel}` })}
-            title="ส่งรูปหน้าจอไป Telegram"
+            onClick={() => sendScreenshotToTelegram({ elementId: 'reports-capture', caption: `📈 ${t('reports.title')} — ${activeLabel}` })}
+            title={t('dashboard.sendToTelegram')}
           >
             <Camera className="w-4 h-4 mr-1.5" />
-            <span className="hidden md:inline">ส่งรูปไป Telegram</span>
+            <span className="hidden md:inline">{t('dashboard.sendToTelegram')}</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -205,7 +208,7 @@ export default function ReportsPage() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => applyPreset('custom')}
                 className={preset === 'custom' ? 'bg-primary/10 text-primary font-medium' : ''}>
-                กำหนดเอง...
+                {t('reports.custom')}...
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -216,14 +219,14 @@ export default function ReportsPage() {
       {showCustom && (
         <div className="flex flex-wrap items-end gap-3 p-4 bg-muted/50 rounded-xl border border-border">
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground font-medium">จากวันที่</label>
+            <label className="text-xs text-muted-foreground font-medium">{t('common.from')}</label>
             <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-9 w-40" />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground font-medium">ถึงวันที่</label>
+            <label className="text-xs text-muted-foreground font-medium">{t('common.to')}</label>
             <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-9 w-40" />
           </div>
-          <Button size="sm" onClick={loadReport} className="h-9">ดูรายงาน</Button>
+          <Button size="sm" onClick={loadReport} className="h-9">{t('reports.viewReport')}</Button>
         </div>
       )}
 
@@ -257,13 +260,13 @@ export default function ReportsPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Card className="xl:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">ยอดขาย & กำไร</CardTitle>
+            <CardTitle className="text-base font-semibold">{t('reports.salesAndProfit')}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
               <Skeleton className="w-full h-56 bg-muted" />
             ) : chartData.length === 0 ? (
-              <div className="flex items-center justify-center h-56 text-muted-foreground text-sm">ไม่มีข้อมูลในช่วงที่เลือก</div>
+              <div className="flex items-center justify-center h-56 text-muted-foreground text-sm">{t('common.noDataInRange')}</div>
             ) : (
               <div className="w-full min-w-0 overflow-hidden">
                 <ResponsiveContainer width="100%" height={220}>
@@ -276,8 +279,8 @@ export default function ReportsPage() {
                       contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
                     />
                     <Legend layout="horizontal" wrapperStyle={{ paddingTop: 8 }} />
-                    <Bar dataKey="ยอดขาย" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="กำไร" fill="hsl(var(--chart-2))" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="sales" name={t('dashboard.sales')} fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="profit" name={t('dashboard.profit')} fill="hsl(var(--chart-2))" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -288,7 +291,7 @@ export default function ReportsPage() {
         {/* Top products pie */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">สินค้าขายดี (ชิ้น)</CardTitle>
+            <CardTitle className="text-base font-semibold">{t('reports.topProductsPie')}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -296,7 +299,7 @@ export default function ReportsPage() {
             ) : topProducts.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-56 text-muted-foreground">
                 <Package className="w-8 h-8 mb-2 opacity-30" />
-                <p className="text-sm">ไม่มีข้อมูล</p>
+                <p className="text-sm">{t('common.noData')}</p>
               </div>
             ) : (
               <div className="w-full min-w-0 overflow-hidden">
@@ -309,7 +312,7 @@ export default function ReportsPage() {
                         <Cell key={index} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number, name: string) => [v + ' ชิ้น', name]}
+                    <Tooltip formatter={(v: number, name: string) => [`${v} ${t('common.pieces')}`, name]}
                       contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
                     <Legend layout="horizontal" wrapperStyle={{ paddingTop: 4, fontSize: '11px' }} />
                   </PieChart>
@@ -323,7 +326,7 @@ export default function ReportsPage() {
       {/* Top Products table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold">สินค้าขายดี 10 อันดับ</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('reports.top10Products')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full max-w-full">
@@ -331,9 +334,9 @@ export default function ReportsPage() {
               <thead>
                 <tr className="border-b border-border bg-muted/30">
                   <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">#</th>
-                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">สินค้า</th>
-                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">ขายได้ (ชิ้น)</th>
-                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">ยอดขาย</th>
+                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">{t('reports.product')}</th>
+                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">{t('reports.qtySold')}</th>
+                  <th className="text-right px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">{t('reports.revenue')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -347,7 +350,7 @@ export default function ReportsPage() {
                   ))
                 ) : topProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-8 text-muted-foreground text-sm">ยังไม่มีข้อมูลการขายในช่วงที่เลือก</td>
+                    <td colSpan={4} className="text-center py-8 text-muted-foreground text-sm">{t('common.noDataInRange')}</td>
                   </tr>
                 ) : topProducts.map((p, i) => (
                   <tr key={p.name} className="border-b border-border last:border-0 hover:bg-muted/20">

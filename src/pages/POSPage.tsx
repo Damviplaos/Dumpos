@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Search, Plus, Minus, Trash2, ShoppingCart, Package,
   Tag, ChevronRight, ScanLine, X,
@@ -17,6 +18,7 @@ import PaymentModal from '@/components/pos/PaymentModal';
 import ReceiptModal from '@/components/pos/ReceiptModal';
 
 export default function POSPage() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -119,9 +121,9 @@ export default function POSPage() {
     if (product) {
       addToCart(product);
       setSearchQuery('');
-      toast.success(`เพิ่ม ${product.name} แล้ว`);
+      toast.success(`${t('pos.addedToCart')} ${product.name}`);
     } else {
-      toast.error(`ไม่พบสินค้าบาร์โค้ด: ${barcode}`);
+      toast.error(`${t('pos.barcodeNotFound')}: ${barcode}`);
     }
   };
 
@@ -153,7 +155,7 @@ export default function POSPage() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKey}
-                placeholder="ค้นหาหรือสแกนบาร์โค้ด..."
+                placeholder={t('pos.searchPlaceholder')}
                 className="pl-9 pr-9"
               />
               {searchQuery && (
@@ -165,7 +167,7 @@ export default function POSPage() {
                 </button>
               )}
             </div>
-            <Button variant="outline" size="icon" title="สแกนบาร์โค้ด" onClick={() => searchRef.current?.focus()}>
+            <Button variant="outline" size="icon" title={t('pos.scanBarcode')} onClick={() => searchRef.current?.focus()}>
               <ScanLine className="w-4 h-4" />
             </Button>
           </div>
@@ -208,7 +210,7 @@ export default function POSPage() {
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-16">
               <Package className="w-12 h-12 mb-3 opacity-30" />
-              <p className="text-sm">ไม่พบสินค้า</p>
+              <p className="text-sm">{t('pos.noProducts')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -239,7 +241,7 @@ export default function POSPage() {
                       <p className="text-sm font-medium text-foreground line-clamp-2 text-balance leading-snug">{product.name}</p>
                       <p className="text-sm font-bold text-primary mt-1">{formatCurrency(product.price)}</p>
                       <p className={`text-xs mt-0.5 ${product.stock <= 5 ? 'text-warning' : 'text-muted-foreground'}`}>
-                        คงเหลือ: {product.stock}
+                        {t('pos.stockLeft')}: {product.stock}
                       </p>
                     </div>
                     {inCart && (
@@ -266,7 +268,7 @@ export default function POSPage() {
         <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">ตะกร้าสินค้า</span>
+            <span className="font-semibold text-foreground">{t('pos.cart')}</span>
             {cart.length > 0 && (
               <Badge className="bg-primary text-primary-foreground text-xs">{cart.length}</Badge>
             )}
@@ -274,7 +276,7 @@ export default function POSPage() {
           {cart.length > 0 && (
             <Button variant="ghost" size="sm" onClick={clearCart} className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 px-2">
               <Trash2 className="w-4 h-4 mr-1" />
-              <span className="text-xs">ล้าง</span>
+              <span className="text-xs">{t('pos.clear')}</span>
             </Button>
           )}
         </div>
@@ -284,8 +286,8 @@ export default function POSPage() {
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8">
               <ShoppingCart className="w-10 h-10 mb-2 opacity-20" />
-              <p className="text-sm">ยังไม่มีสินค้าในตะกร้า</p>
-              <p className="text-xs mt-1">คลิกสินค้าเพื่อเพิ่ม</p>
+              <p className="text-sm">{t('pos.emptyCart')}</p>
+              <p className="text-xs mt-1">{t('pos.clickToAdd')}</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
@@ -293,7 +295,7 @@ export default function POSPage() {
                 <div key={item.product.id} className="px-4 py-3 flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground line-clamp-1">{item.product.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{formatCurrency(item.unit_price)} / ชิ้น</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{formatCurrency(item.unit_price)} / {t('pos.perUnit')}</p>
                     <p className="text-sm font-semibold text-primary mt-1">{formatCurrency(item.subtotal)}</p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -332,18 +334,18 @@ export default function POSPage() {
         {/* Cart Summary + Pay button */}
         <div className="border-t border-border bg-card shrink-0 p-4 space-y-2">
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>ยอดรวมสินค้า</span>
+            <span>{t('pos.subtotal')}</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
           {taxRate > 0 && (
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>ภาษี VAT {taxRate}%</span>
+              <span>{t('pos.taxVat')} {taxRate}%</span>
               <span>{formatCurrency(taxAmount)}</span>
             </div>
           )}
           <Separator />
           <div className="flex justify-between font-bold text-foreground text-lg">
-            <span>ยอดชำระ</span>
+            <span>{t('pos.grandTotal')}</span>
             <span className="text-primary">{formatCurrency(total)}</span>
           </div>
           <Button
@@ -352,7 +354,7 @@ export default function POSPage() {
             onClick={() => setShowPayment(true)}
           >
             <ShoppingCart className="w-5 h-5 mr-2" />
-            ชำระเงิน
+            {t('pos.checkout')}
             {cart.length > 0 && <ChevronRight className="w-4 h-4 ml-1" />}
           </Button>
         </div>

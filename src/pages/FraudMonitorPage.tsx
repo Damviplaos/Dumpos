@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Shield, AlertTriangle, Eye, CheckCircle, Search,
   Filter, RefreshCw, Clock, User, Activity,
@@ -80,6 +81,7 @@ const FRAUD_TYPE_LABELS: Record<string, string> = {
 
 // ============ Main Component ============
 export default function FraudMonitorPage() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [tab, setTab] = useState('alerts');
   const [alerts, setAlerts] = useState<FraudAlert[]>([]);
@@ -169,10 +171,10 @@ export default function FraudMonitorPage() {
       .from('fraud_alerts')
       .update({ is_reviewed: true, reviewed_by: profile?.id, reviewed_at: new Date().toISOString() })
       .eq('id', alert.id);
-    if (error) { toast.error('อัปเดตไม่สำเร็จ'); return; }
+    if (error) { toast.error(t('common.error')); return; }
     setAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, is_reviewed: true } : a));
     setStats(s => ({ ...s, unreviewed: Math.max(0, s.unreviewed - 1) }));
-    toast.success('ทำเครื่องหมายตรวจสอบแล้ว');
+    toast.success(t('common.success'));
   };
 
   // Filter alerts

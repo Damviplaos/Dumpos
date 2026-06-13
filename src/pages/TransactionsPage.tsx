@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Eye, X, RotateCcw, Ban, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/db/supabase';
@@ -27,6 +28,7 @@ import {
 const PAGE_SIZE = 20;
 
 export default function TransactionsPage() {
+  const { t } = useTranslation();
   const { profile, isAdmin } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +86,7 @@ export default function TransactionsPage() {
     setVoidLoading(false);
 
     if (error) {
-      toast.error('เกิดข้อผิดพลาด: ' + error.message);
+      toast.error(`${t('common.error')}: ${error.message}`);
       return;
     }
 
@@ -92,15 +94,15 @@ export default function TransactionsPage() {
 
     if (result.blocked) {
       // Fraud detected — completed bill tamper attempt
-      toast.error('🚨 ถูกบล็อก: ' + result.error, { duration: 6000 });
-      toast.warning('⚠️ ระบบบันทึกการพยายามยักยอกทรัพย์แล้ว กรุณาตรวจสอบ Fraud Monitor', { duration: 8000 });
+      toast.error(`🚨 ${t('transactions.blocked')}: ${result.error}`, { duration: 6000 });
+      toast.warning(`⚠️ ${t('transactions.tamperingLogged')}`, { duration: 8000 });
       setVoidTx(null);
       setVoidReason('');
       return;
     }
 
     if (!result.success) {
-      toast.error(result.error || 'ยกเลิกรายการไม่สำเร็จ');
+      toast.error(result.error || t('transactions.voidFailed') as string);
       return;
     }
 
@@ -135,7 +137,7 @@ export default function TransactionsPage() {
       });
     }
 
-    toast.success(`ยกเลิกออเดอร์ ${voidTx.order_number} แล้ว`);
+    toast.success(`${t('transactions.voidSuccess')} ${voidTx.order_number}`);
     setVoidTx(null);
     setVoidReason('');
     loadTransactions();
@@ -148,23 +150,27 @@ export default function TransactionsPage() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, { label: string; cls: string }> = {
-      completed: { label: 'สำเร็จ', cls: 'bg-success/10 text-success' },
-      voided: { label: 'ยกเลิก', cls: 'bg-destructive/10 text-destructive' },
-      refunded: { label: 'คืนเงิน', cls: 'bg-warning/10 text-warning' },
+      completed: { label: t('transactions.statusCompleted'), cls: 'bg-success/10 text-success' },
+      voided: { label: t('transactions.statusVoided'), cls: 'bg-destructive/10 text-destructive' },
+      refunded: { label: t('transactions.statusRefunded'), cls: 'bg-warning/10 text-warning' },
     };
     const s = map[status] || { label: status, cls: 'bg-muted text-muted-foreground' };
     return <Badge variant="secondary" className={`text-xs ${s.cls}`}>{s.label}</Badge>;
   };
 
-  const methodLabel = (m: string) => ({ cash: 'เงินสด', card: 'บัตร', qr: 'QR Code' }[m] || m);
+  const methodLabel = (m: string) => ({
+    cash: t('transactions.cash'),
+    card: t('transactions.card'),
+    qr: 'QR Code',
+  }[m] || m);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold text-foreground text-balance">ประวัติการขาย</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">รายการขายทั้งหมด {total} รายการ</p>
+        <h2 className="text-xl font-bold text-foreground text-balance">{t('transactions.title')}</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">{t('transactions.totalCount')} {total}</p>
       </div>
 
       {/* Filters */}
@@ -174,7 +180,7 @@ export default function TransactionsPage() {
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="ค้นหาหมายเลขออเดอร์..."
+            placeholder={t('transactions.searchPlaceholder') as string}
             className="pl-9"
           />
           {search && (
@@ -185,23 +191,23 @@ export default function TransactionsPage() {
         </div>
         <Select value={filterStatus} onValueChange={v => { setFilterStatus(v); setPage(0); }}>
           <SelectTrigger className="w-full md:w-36">
-            <SelectValue placeholder="สถานะทั้งหมด" />
+            <SelectValue placeholder={t('transactions.allStatus')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">สถานะทั้งหมด</SelectItem>
-            <SelectItem value="completed">สำเร็จ</SelectItem>
-            <SelectItem value="voided">ยกเลิก</SelectItem>
-            <SelectItem value="refunded">คืนเงิน</SelectItem>
+            <SelectItem value="all">{t('transactions.allStatus')}</SelectItem>
+            <SelectItem value="completed">{t('transactions.completed')}</SelectItem>
+            <SelectItem value="voided">{t('transactions.voided')}</SelectItem>
+            <SelectItem value="refunded">{t('transactions.refunded')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterMethod} onValueChange={v => { setFilterMethod(v); setPage(0); }}>
           <SelectTrigger className="w-full md:w-40">
-            <SelectValue placeholder="วิธีชำระทั้งหมด" />
+            <SelectValue placeholder={t('transactions.allPayment')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">วิธีชำระทั้งหมด</SelectItem>
-            <SelectItem value="cash">เงินสด</SelectItem>
-            <SelectItem value="card">บัตรเครดิต/เดบิต</SelectItem>
+            <SelectItem value="all">{t('transactions.allPayment')}</SelectItem>
+            <SelectItem value="cash">{t('transactions.cash')}</SelectItem>
+            <SelectItem value="card">{t('transactions.card')}</SelectItem>
             <SelectItem value="qr">QR Code</SelectItem>
           </SelectContent>
         </Select>
@@ -212,13 +218,13 @@ export default function TransactionsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="whitespace-nowrap">หมายเลขออเดอร์</TableHead>
-                <TableHead className="whitespace-nowrap">วันที่/เวลา</TableHead>
-                <TableHead className="whitespace-nowrap">ผู้ขาย</TableHead>
-                <TableHead className="whitespace-nowrap text-center">วิธีชำระ</TableHead>
-                <TableHead className="whitespace-nowrap text-right">ยอดรวม</TableHead>
-                <TableHead className="whitespace-nowrap text-center">สถานะ</TableHead>
-                <TableHead className="whitespace-nowrap text-right">จัดการ</TableHead>
+                <TableHead className="whitespace-nowrap">{t('transactions.orderNumber')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('transactions.dateTime')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('transactions.cashier')}</TableHead>
+                <TableHead className="whitespace-nowrap text-center">{t('transactions.paymentMethod')}</TableHead>
+                <TableHead className="whitespace-nowrap text-right">{t('common.total')}</TableHead>
+                <TableHead className="whitespace-nowrap text-center">{t('common.status')}</TableHead>
+                <TableHead className="whitespace-nowrap text-right">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -233,7 +239,7 @@ export default function TransactionsPage() {
               ) : filteredLocal.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-10 text-muted-foreground text-sm">
-                    ไม่พบรายการ
+                    {t('common.noData')}
                   </TableCell>
                 </TableRow>
               ) : filteredLocal.map(tx => (
@@ -248,7 +254,7 @@ export default function TransactionsPage() {
                   <TableCell className="whitespace-nowrap text-center">{statusBadge(tx.status)}</TableCell>
                   <TableCell className="whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => loadTxDetail(tx)} title="ดูรายละเอียด">
+                      <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => loadTxDetail(tx)} title={t('common.view') as string}>
                         <Eye className="w-3.5 h-3.5" />
                       </Button>
                       {tx.status !== 'voided' && (
@@ -257,7 +263,7 @@ export default function TransactionsPage() {
                           size="icon"
                           className="w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => { setVoidTx(tx); setVoidReason(''); }}
-                          title="ยกเลิกรายการ"
+                          title={t('transactions.voidTransaction') as string}
                         >
                           <Ban className="w-3.5 h-3.5" />
                         </Button>
@@ -274,10 +280,10 @@ export default function TransactionsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>แสดง {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} จาก {total}</span>
+          <span>{page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} / {total}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 0}>ก่อนหน้า</Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>ถัดไป</Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 0}>{t('common.previous')}</Button>
+            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>{t('common.next')}</Button>
           </div>
         </div>
       )}
@@ -286,19 +292,19 @@ export default function TransactionsPage() {
       <Dialog open={!!selectedTx} onOpenChange={v => { if (!v) setSelectedTx(null); }}>
         <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-lg max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>รายละเอียด {selectedTx?.order_number}</DialogTitle>
+            <DialogTitle>{t('transactions.transactionDetail')} {selectedTx?.order_number}</DialogTitle>
           </DialogHeader>
           {selectedTx && (
             <div className="space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-2">
-                <div><p className="text-muted-foreground">วันที่/เวลา</p><p className="font-medium">{formatDate(selectedTx.created_at, 'datetime')}</p></div>
-                <div><p className="text-muted-foreground">วิธีชำระเงิน</p><p className="font-medium">{methodLabel(selectedTx.payment_method)}</p></div>
-                <div><p className="text-muted-foreground">ผู้ขาย</p><p className="font-medium">{(selectedTx as any).cashier?.full_name || (selectedTx as any).cashier?.username || '-'}</p></div>
-                <div><p className="text-muted-foreground">สถานะ</p>{statusBadge(selectedTx.status)}</div>
+                <div><p className="text-muted-foreground">{t('transactions.dateTime')}</p><p className="font-medium">{formatDate(selectedTx.created_at, 'datetime')}</p></div>
+                <div><p className="text-muted-foreground">{t('transactions.paymentMethod')}</p><p className="font-medium">{methodLabel(selectedTx.payment_method)}</p></div>
+                <div><p className="text-muted-foreground">{t('transactions.cashier')}</p><p className="font-medium">{(selectedTx as any).cashier?.full_name || (selectedTx as any).cashier?.username || '-'}</p></div>
+                <div><p className="text-muted-foreground">{t('common.status')}</p>{statusBadge(selectedTx.status)}</div>
               </div>
               <Separator />
               <div>
-                <p className="font-semibold text-foreground mb-2">รายการสินค้า</p>
+                <p className="font-semibold text-foreground mb-2">{t('transactions.transactionItems')}</p>
                 <div className="space-y-2">
                   {(selectedTx.items || []).map((item, i) => (
                     <div key={i} className="flex justify-between items-start gap-3">
@@ -313,13 +319,13 @@ export default function TransactionsPage() {
               </div>
               <Separator />
               <div className="space-y-1">
-                <div className="flex justify-between text-muted-foreground"><span>ยอดรวมสินค้า</span><span>{formatCurrency(selectedTx.subtotal)}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>{t('pos.subtotal')}</span><span>{formatCurrency(selectedTx.subtotal)}</span></div>
                 {selectedTx.tax_amount > 0 && <div className="flex justify-between text-muted-foreground"><span>VAT</span><span>{formatCurrency(selectedTx.tax_amount)}</span></div>}
-                <div className="flex justify-between font-bold text-foreground text-base"><span>ยอดชำระ</span><span className="text-primary">{formatCurrency(selectedTx.total)}</span></div>
+                <div className="flex justify-between font-bold text-foreground text-base"><span>{t('pos.grandTotal')}</span><span className="text-primary">{formatCurrency(selectedTx.total)}</span></div>
                 {selectedTx.payment_method === 'cash' && (
                   <>
-                    <div className="flex justify-between text-muted-foreground"><span>รับมา</span><span>{formatCurrency(selectedTx.cash_received)}</span></div>
-                    <div className="flex justify-between text-muted-foreground"><span>เงินทอน</span><span>{formatCurrency(selectedTx.change_amount)}</span></div>
+                    <div className="flex justify-between text-muted-foreground"><span>{t('pos.cashReceived')}</span><span>{formatCurrency(selectedTx.cash_received)}</span></div>
+                    <div className="flex justify-between text-muted-foreground"><span>{t('pos.change')}</span><span>{formatCurrency(selectedTx.change_amount)}</span></div>
                   </>
                 )}
               </div>
@@ -328,7 +334,7 @@ export default function TransactionsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Void Dialog — requires reason, detects completed-bill tampering */}
+      {/* Void Dialog */}
       <AlertDialog open={!!voidTx} onOpenChange={v => { if (!v) { setVoidTx(null); setVoidReason(''); } }}>
         <AlertDialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
           <AlertDialogHeader>
@@ -336,35 +342,31 @@ export default function TransactionsPage() {
               {voidTx?.status === 'completed' && (
                 <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
               )}
-              ยืนยันการยกเลิกรายการ
+              {t('transactions.voidConfirm')}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3 text-sm text-muted-foreground">
                 {voidTx?.status === 'completed' ? (
                   isAdmin ? (
                     <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-warning font-medium">
-                      ⚠️ บิลนี้ชำระเงินแล้ว (สถานะ: สำเร็จ)<br />
-                      การยกเลิกจะถูกบันทึกในระบบ Audit Log ระดับ Warning<br />
-                      ระบบจะคืนสต็อกสินค้ากลับโดยอัตโนมัติ
+                      {t('transactions.voidWarningAdmin')}
                     </div>
                   ) : (
                     <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-destructive font-medium">
-                      🚫 บิลนี้ชำระเงินแล้ว — ไม่อนุญาตให้ยกเลิก<br />
-                      การพยายามยกเลิกจะถูกบันทึกเป็น <strong>หลักฐานการโกง</strong> ทันที
+                      {t('transactions.voidBlockedCashier')}
                     </div>
                   )
                 ) : (
-                  <p>ต้องการยกเลิกออเดอร์ <strong className="text-foreground">{voidTx?.order_number}</strong>?<br />
-                  ระบบจะคืนสต็อกสินค้ากลับโดยอัตโนมัติ</p>
+                  <p>{t('transactions.voidConfirmBody')} <strong className="text-foreground">{voidTx?.order_number}</strong></p>
                 )}
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-1.5">
-                    เหตุผลการยกเลิก <span className="text-destructive">*</span>
+                    {t('transactions.voidReason')} <span className="text-destructive">*</span>
                   </label>
                   <Textarea
                     value={voidReason}
                     onChange={e => setVoidReason(e.target.value)}
-                    placeholder="ระบุเหตุผล..."
+                    placeholder={t('transactions.voidReasonPlaceholder') as string}
                     className="resize-none text-sm min-h-[72px]"
                   />
                 </div>
@@ -372,7 +374,7 @@ export default function TransactionsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-end gap-2 mt-2">
-            <AlertDialogCancel disabled={voidLoading}>ยกเลิก</AlertDialogCancel>
+            <AlertDialogCancel disabled={voidLoading}>{t('common.cancel')}</AlertDialogCancel>
             <Button
               variant="destructive"
               onClick={handleVoid}
@@ -380,7 +382,7 @@ export default function TransactionsPage() {
               className="gap-1.5"
             >
               <RotateCcw className="w-4 h-4" />
-              {voidLoading ? 'กำลังดำเนินการ...' : 'ยืนยันยกเลิก'}
+              {voidLoading ? t('common.loading') : t('transactions.voidConfirm')}
             </Button>
           </div>
         </AlertDialogContent>

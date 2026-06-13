@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, ShoppingBag, DollarSign, Package, AlertTriangle, CalendarDays, ChevronDown, Camera } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,19 +26,11 @@ interface DashboardStats {
 
 interface ChartData {
   label: string;
-  ยอดขาย: number;
-  กำไร: number;
+  sales: number;
+  profit: number;
 }
 
 type PresetKey = 'today' | 'yesterday' | 'week' | 'month' | 'custom';
-
-const PRESETS: { key: PresetKey; label: string }[] = [
-  { key: 'today', label: 'วันนี้' },
-  { key: 'yesterday', label: 'เมื่อวาน' },
-  { key: 'week', label: '7 วันล่าสุด' },
-  { key: 'month', label: 'เดือนนี้' },
-  { key: 'custom', label: 'กำหนดเอง' },
-];
 
 function toDateStr(d: Date) { return d.toISOString().split('T')[0]; }
 
@@ -60,7 +53,16 @@ function getPresetRange(key: PresetKey): { from: string; to: string } {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [preset, setPreset] = useState<PresetKey>('today');
+
+  const PRESETS: { key: PresetKey; label: string }[] = [
+    { key: 'today', label: t('dashboard.today') },
+    { key: 'yesterday', label: t('dashboard.yesterday') },
+    { key: 'week', label: t('dashboard.last7days') },
+    { key: 'month', label: t('dashboard.thisMonth') },
+    { key: 'custom', label: t('dashboard.customRange') },
+  ];
   const [customFrom, setCustomFrom] = useState(toDateStr(new Date()));
   const [customTo, setCustomTo] = useState(toDateStr(new Date()));
   const [showCustom, setShowCustom] = useState(false);
@@ -123,7 +125,7 @@ export default function DashboardPage() {
         const items = Array.isArray(t.items) ? t.items : [];
         return s + items.reduce((si: number, it: any) => si + ((it.unit_price - it.cost) * it.quantity), 0);
       }, 0);
-      days.push({ label: formatDate(new Date(ds), 'short'), ยอดขาย: Math.round(sales), กำไร: Math.round(profit) });
+      days.push({ label: formatDate(new Date(ds), 'short'), sales: Math.round(sales), profit: Math.round(profit) });
     }
     setChartData(days);
     setLoading(false);
@@ -139,13 +141,13 @@ export default function DashboardPage() {
 
   const activeLabel = preset === 'custom'
     ? `${customFrom} — ${customTo}`
-    : PRESETS.find(p => p.key === preset)?.label ?? 'วันนี้';
+    : PRESETS.find(p => p.key === preset)?.label ?? t('dashboard.today');
 
   const statCards = [
-    { title: 'ยอดขายรวม', value: stats ? formatCurrency(stats.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
-    { title: 'ออเดอร์', value: stats ? `${stats.totalOrders} รายการ` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
-    { title: 'กำไรรวม', value: stats ? formatCurrency(stats.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
-    { title: 'สินค้าใกล้หมด', value: stats ? `${stats.lowStockCount} รายการ` : '-', icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10' },
+    { title: t('dashboard.totalSales'), value: stats ? formatCurrency(stats.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
+    { title: t('dashboard.totalOrders'), value: stats ? `${stats.totalOrders} ${t('common.items')}` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
+    { title: t('dashboard.totalProfit'), value: stats ? formatCurrency(stats.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
+    { title: t('dashboard.lowStock'), value: stats ? `${stats.lowStockCount} ${t('common.items')}` : '-', icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10' },
   ];
 
   return (
@@ -153,18 +155,18 @@ export default function DashboardPage() {
       {/* Header + date range picker */}
       <div className="flex flex-col md:flex-row md:items-center gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground text-balance">แดชบอร์ด</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">สรุปภาพรวมของร้าน</p>
+          <h2 className="text-xl font-bold text-foreground text-balance">{t('dashboard.title')}</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">{t('dashboard.subtitle')}</p>
         </div>
         <div className="md:ml-auto flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => sendScreenshotToTelegram({ elementId: 'dashboard-capture', caption: `📊 แดชบอร์ด — ${activeLabel}` })}
-            title="ส่งรูปหน้าจอไป Telegram"
+            onClick={() => sendScreenshotToTelegram({ elementId: 'dashboard-capture', caption: `📊 ${t('dashboard.title')} — ${activeLabel}` })}
+            title={t('dashboard.sendToTelegram')}
           >
             <Camera className="w-4 h-4 mr-1.5" />
-            <span className="hidden md:inline">ส่งรูปไป Telegram</span>
+            <span className="hidden md:inline">{t('dashboard.sendToTelegram')}</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -184,7 +186,7 @@ export default function DashboardPage() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => applyPreset('custom')}
                 className={preset === 'custom' ? 'bg-primary/10 text-primary font-medium' : ''}>
-                กำหนดเอง...
+                {t('dashboard.customRange')}...
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -195,14 +197,14 @@ export default function DashboardPage() {
       {showCustom && (
         <div className="flex flex-wrap items-end gap-3 p-4 bg-muted/50 rounded-xl border border-border">
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground font-medium">จากวันที่</label>
+            <label className="text-xs text-muted-foreground font-medium">{t('common.from')}</label>
             <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-9 w-40" />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground font-medium">ถึงวันที่</label>
+            <label className="text-xs text-muted-foreground font-medium">{t('common.to')}</label>
             <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-9 w-40" />
           </div>
-          <Button size="sm" onClick={loadDashboard} className="h-9">ดูข้อมูล</Button>
+          <Button size="sm" onClick={loadDashboard} className="h-9">{t('common.viewData')}</Button>
         </div>
       )}
 
@@ -235,13 +237,13 @@ export default function DashboardPage() {
       {/* Chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold">ยอดขาย & กำไร — {activeLabel}</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('dashboard.salesAndProfit')} — {activeLabel}</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <Skeleton className="w-full h-56 bg-muted" />
           ) : chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-56 text-muted-foreground text-sm">ไม่มีข้อมูลในช่วงที่เลือก</div>
+            <div className="flex items-center justify-center h-56 text-muted-foreground text-sm">{t('common.noDataInRange')}</div>
           ) : (
             <div className="w-full min-w-0 overflow-hidden">
               <ResponsiveContainer width="100%" height={220}>
@@ -254,8 +256,8 @@ export default function DashboardPage() {
                     contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
                   />
                   <Legend layout="horizontal" wrapperStyle={{ paddingTop: 8 }} />
-                  <Bar dataKey="ยอดขาย" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="กำไร" fill="hsl(var(--chart-2))" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="sales" name={t('dashboard.sales')} fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="profit" name={t('dashboard.profit')} fill="hsl(var(--chart-2))" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -267,13 +269,13 @@ export default function DashboardPage() {
         {/* Recent Transactions */}
         <Card className="h-full flex flex-col">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">รายการขายล่าสุด</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('dashboard.recentSales')}</CardTitle>
           </CardHeader>
           <CardContent className="flex-1">
             {loading ? (
               <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 bg-muted" />)}</div>
             ) : recentTx.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">ไม่มีรายการในช่วงที่เลือก</p>
+              <p className="text-sm text-muted-foreground text-center py-6">{t('common.noDataInRange')}</p>
             ) : (
               <div className="space-y-2">
                 {recentTx.map((tx) => (
@@ -283,7 +285,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{tx.order_number}</p>
-                      <p className="text-xs text-muted-foreground">{paymentLabel(tx.payment_method)}</p>
+                      <p className="text-xs text-muted-foreground">{paymentLabel(tx.payment_method, t)}</p>
                     </div>
                     <p className="text-sm font-semibold text-foreground shrink-0">{formatCurrency(tx.total)}</p>
                   </div>
@@ -297,17 +299,17 @@ export default function DashboardPage() {
         <Card className="h-full flex flex-col">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              สินค้าใกล้หมด
+              {t('dashboard.lowStock')}
               {stats && stats.lowStockCount > 0 && (
-                <Badge className="bg-warning text-warning-foreground border-0 text-xs">{stats.lowStockCount}</Badge>
-              )}
+                  <Badge className="bg-warning text-warning-foreground border-0 text-xs">{stats.lowStockCount}</Badge>
+                )}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1">
             {loading ? (
               <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 bg-muted" />)}</div>
             ) : lowStockProducts.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">สินค้าทุกรายการมีสต็อกเพียงพอ</p>
+              <p className="text-sm text-muted-foreground text-center py-6">{t('dashboard.stockSufficient')}</p>
             ) : (
               <div className="space-y-2">
                 {lowStockProducts.map((product) => (
@@ -317,13 +319,13 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">{(product as any).category?.name || 'ไม่มีหมวดหมู่'}</p>
+                      <p className="text-xs text-muted-foreground">{(product as any).category?.name || t('products.noCategory')}</p>
                     </div>
                     <Badge
                       variant="secondary"
                       className={`shrink-0 text-xs ${product.stock === 0 ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}
                     >
-                      เหลือ {product.stock}
+                      {t('dashboard.stockLeft')} {product.stock}
                     </Badge>
                   </div>
                 ))}
@@ -336,7 +338,11 @@ export default function DashboardPage() {
   );
 }
 
-function paymentLabel(method: string) {
-  const map: Record<string, string> = { cash: 'เงินสด', card: 'บัตรเครดิต/เดบิต', qr: 'QR Code' };
+function paymentLabel(method: string, t: (key: string) => string) {
+  const map: Record<string, string> = {
+    cash: t('transactions.cash'),
+    card: t('transactions.card'),
+    qr: 'QR Code',
+  };
   return map[method] || method;
 }

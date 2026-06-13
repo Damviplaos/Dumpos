@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +28,14 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [storeName, setStoreName] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('store_settings').select('store_name, logo_url').maybeSingle().then(({ data }) => {
+      if (data) { setStoreName(data.store_name ?? null); setLogoUrl((data as any).logo_url ?? null); }
+    });
+  }, []);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -91,10 +99,16 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-md">
-            <ShoppingCart className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground text-balance">ระบบขายหน้าร้าน</h1>
+          {logoUrl ? (
+            <img src={logoUrl} alt="store logo" className="w-16 h-16 rounded-2xl object-contain mb-4 shadow-md bg-card border border-border" />
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-md">
+              <ShoppingCart className="w-8 h-8 text-primary-foreground" />
+            </div>
+          )}
+          <h1 className="text-2xl font-bold text-foreground text-balance">
+            {storeName || t('login.systemName')}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">POS System</p>
         </div>
 
@@ -171,10 +185,10 @@ export default function LoginPage() {
                         />
                       </FormControl>
                       <div className="text-sm text-muted-foreground leading-relaxed">
-                        ฉันยอมรับ{' '}
-                        <span className="text-primary cursor-pointer hover:underline">ข้อตกลงการใช้งาน</span>
-                        {' '}และ{' '}
-                        <span className="text-primary cursor-pointer hover:underline">นโยบายความเป็นส่วนตัว</span>
+                        {t('login.agreePrefix')}{' '}
+                        <span className="text-primary cursor-pointer hover:underline">{t('login.termsOfService')}</span>
+                        {' '}{t('login.agreeAnd')}{' '}
+                        <span className="text-primary cursor-pointer hover:underline">{t('login.privacyPolicy')}</span>
                       </div>
                     </div>
                     <FormMessage />
@@ -193,7 +207,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          © {new Date().getFullYear()} ระบบขายหน้าร้าน POS
+          © {new Date().getFullYear()} {t('login.copyright')}
         </p>
       </div>
     </div>

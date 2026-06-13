@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Save, Store, Phone, MapPin, Receipt, Bell, Percent, Plus, Pencil, Trash2,
   Send, Bot, CheckCircle, XCircle, AlertTriangle, Link2, Copy, Tag,
@@ -72,6 +73,7 @@ const PRESET_COLORS = [
 const PRESET_EMOJIS = ['🏷️', '⭐', '🔥', '💎', '🚀', '👑', '🎖️', '🛡️', '⚡', '🌟', '🎯', '🦁', '🌈', '🏆', '💪', '🎓'];
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
@@ -167,13 +169,13 @@ export default function SettingsPage() {
       ? await supabase.from('store_settings').update(payload).eq('id', settings.id)
       : await supabase.from('store_settings').insert(payload);
     setSavingSettings(false);
-    if (error) { toast.error('บันทึกการตั้งค่าไม่สำเร็จ'); return; }
-    toast.success('บันทึกการตั้งค่าแล้ว');
+    if (error) { toast.error(t('common.error')); return; }
+    toast.success(t('settings.saveSuccess'));
     loadSettings();
   };
 
   const onSaveTelegram = async (data: TelegramForm) => {
-    if (!settings?.id) { toast.error('กรุณาบันทึกข้อมูลร้านก่อน'); return; }
+    if (!settings?.id) { toast.error(t('settings.saveFirst')); return; }
     setSavingTelegram(true);
     const { error } = await supabase.from('store_settings').update({
       telegram_bot_token: data.telegram_bot_token || null,
@@ -181,8 +183,8 @@ export default function SettingsPage() {
       updated_at: new Date().toISOString(),
     }).eq('id', settings.id);
     setSavingTelegram(false);
-    if (error) { toast.error('บันทึก Telegram ไม่สำเร็จ'); return; }
-    toast.success('บันทึกการตั้งค่า Telegram แล้ว');
+    if (error) { toast.error(t('common.error')); return; }
+    toast.success(t('settings.saveSuccess'));
     setTelegramStatus(data.telegram_bot_token && data.telegram_chat_id ? 'ok' : 'idle');
     loadSettings();
   };
@@ -190,7 +192,7 @@ export default function SettingsPage() {
   const onTestTelegram = async () => {
     const { telegram_bot_token, telegram_chat_id } = telegramForm.getValues();
     if (!telegram_bot_token || !telegram_chat_id) {
-      toast.error('กรุณากรอก Bot Token และ Chat ID ก่อนทดสอบ'); return;
+      toast.error(t('settings.enterTokenFirst')); return;
     }
     setTestingTelegram(true);
     const { data, error } = await supabase.functions.invoke('send-telegram', {
@@ -201,15 +203,15 @@ export default function SettingsPage() {
     });
     setTestingTelegram(false);
     if (error || !data?.success) {
-      setTelegramStatus('fail'); toast.error('ทดสอบ Telegram ไม่สำเร็จ: Token หรือ Chat ID ไม่ถูกต้อง');
+      setTelegramStatus('fail'); toast.error(t('settings.telegramFailed'));
     } else {
-      setTelegramStatus('ok'); toast.success('ส่งข้อความทดสอบพร้อมปุ่มเมนูไปยัง Telegram สำเร็จ!');
+      setTelegramStatus('ok'); toast.success(t('settings.telegramConnected'));
     }
   };
 
   const onRegisterWebhook = async () => {
     const { telegram_bot_token } = telegramForm.getValues();
-    if (!telegram_bot_token) { toast.error('กรุณากรอก Bot Token ก่อน'); return; }
+    if (!telegram_bot_token) { toast.error(t('settings.enterTokenFirst')); return; }
     setRegisteringWebhook(true);
     const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`;
     try {
@@ -220,10 +222,10 @@ export default function SettingsPage() {
       });
       const result = await res.json();
       setRegisteringWebhook(false);
-      if (result.ok) { setWebhookStatus('ok'); toast.success('ลงทะเบียน Webhook สำเร็จ! Bot รับคำสั่งได้แล้ว'); }
-      else { setWebhookStatus('fail'); toast.error('ลงทะเบียน Webhook ไม่สำเร็จ: ' + (result.description || 'unknown error')); }
+      if (result.ok) { setWebhookStatus('ok'); toast.success(t('settings.webhookOk')); }
+      else { setWebhookStatus('fail'); toast.error(t('settings.webhookFail') + (result.description || 'unknown error')); }
     } catch (e) {
-      setRegisteringWebhook(false); setWebhookStatus('fail'); toast.error('เกิดข้อผิดพลาด: ' + String(e));
+      setRegisteringWebhook(false); setWebhookStatus('fail'); toast.error(t('settings.webhookError') + String(e));
     }
   };
 
@@ -245,15 +247,15 @@ export default function SettingsPage() {
       ? await supabase.from('categories').update(payload).eq('id', editCat.id)
       : await supabase.from('categories').insert(payload);
     setSavingCat(false);
-    if (error) { toast.error(`บันทึกไม่สำเร็จ: ${error.message}`); return; }
-    toast.success(editCat ? 'แก้ไขหมวดหมู่แล้ว' : 'เพิ่มหมวดหมู่แล้ว');
+    if (error) { toast.error(t('settings.saveFailed') + error.message); return; }
+    toast.success(editCat ? t('settings.categoryEdited') : t('settings.categoryAdded'));
     setShowCatForm(false); loadCategories();
   };
   const handleDeleteCat = async () => {
     if (!deleteCat) return;
     const { error } = await supabase.from('categories').delete().eq('id', deleteCat.id);
-    if (error) { toast.error('ลบหมวดหมู่ไม่สำเร็จ: มีสินค้าอยู่ในหมวดหมู่นี้'); return; }
-    toast.success('ลบหมวดหมู่แล้ว'); setDeleteCat(null); loadCategories();
+    if (error) { toast.error(t('settings.categoryDeleteFailed')); return; }
+    toast.success(t('settings.categoryDeleted')); setDeleteCat(null); loadCategories();
   };
 
   // ── Store Badges ─────────────────────────────────────────────────────────
@@ -281,29 +283,29 @@ export default function SettingsPage() {
       ? await supabase.from('store_roles').update(payload).eq('id', editBadge.id)
       : await supabase.from('store_roles').insert(payload);
     setSavingBadge(false);
-    if (error) { toast.error(`บันทึกไม่สำเร็จ: ${error.message}`); return; }
-    toast.success(editBadge ? 'แก้ไข Badge แล้ว' : 'เพิ่ม Badge แล้ว');
+    if (error) { toast.error(t('settings.saveFailed') + error.message); return; }
+    toast.success(editBadge ? t('settings.badgeEdited') : t('settings.badgeAdded'));
     setShowBadgeForm(false); loadBadges();
   };
   const handleDeleteBadge = async () => {
     if (!deleteBadge) return;
     const { error } = await supabase.from('store_roles').delete().eq('id', deleteBadge.id);
-    if (error) { toast.error('ลบ Badge ไม่สำเร็จ'); return; }
-    toast.success('ลบ Badge แล้ว'); setDeleteBadge(null); loadBadges();
+    if (error) { toast.error(t('settings.badgeDeleteFailed')); return; }
+    toast.success(t('settings.badgeDeleted')); setDeleteBadge(null); loadBadges();
   };
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h2 className="text-xl font-bold text-foreground text-balance">ตั้งค่าร้าน</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">จัดการข้อมูลร้านและการตั้งค่าระบบ</p>
+        <h2 className="text-xl font-bold text-foreground text-balance">{t('settings.title')}</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">{t('settings.subtitle')}</p>
       </div>
 
       {/* Store Settings Card */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Store className="w-4 h-4 text-primary" />ข้อมูลร้านและการตั้งค่า
+            <Store className="w-4 h-4 text-primary" />{t('settings.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -314,8 +316,8 @@ export default function SettingsPage() {
               <form onSubmit={settingsForm.handleSubmit(onSaveSettings)} className="space-y-4">
                 <FormField control={settingsForm.control} name="store_name" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Store className="w-3.5 h-3.5" />ชื่อร้าน *</FormLabel>
-                    <FormControl><Input {...field} placeholder="ร้านของฉัน" /></FormControl>
+                    <FormLabel className="text-sm font-normal flex items-center gap-1.5"><Store className="w-3.5 h-3.5" />{t('settings.storeName')}</FormLabel>
+                    <FormControl><Input {...field} placeholder={t('settings.storeNamePlaceholder')} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -367,7 +369,7 @@ export default function SettingsPage() {
                   </FormItem>
                 )} />
                 <Button type="submit" disabled={savingSettings} className="w-full md:w-auto">
-                  <Save className="w-4 h-4 mr-1.5" />{savingSettings ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่า'}
+                  <Save className="w-4 h-4 mr-1.5" />{savingSettings ? t('settings.saving') : t('settings.saveSettings')}
                 </Button>
               </form>
             </Form>
@@ -383,9 +385,9 @@ export default function SettingsPage() {
               <Bot className="w-4 h-4 text-primary" />Telegram Bot แจ้งเตือน
             </CardTitle>
             <div className="flex items-center gap-2 flex-wrap">
-              {telegramStatus === 'ok' && <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 gap-1 text-xs"><CheckCircle className="w-3 h-3" />เชื่อมต่อแล้ว</Badge>}
-              {telegramStatus === 'fail' && <Badge className="bg-destructive/10 text-destructive gap-1 text-xs"><XCircle className="w-3 h-3" />เชื่อมต่อไม่ได้</Badge>}
-              {webhookStatus === 'ok' && <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 gap-1 text-xs"><Link2 className="w-3 h-3" />Webhook ใช้งานได้</Badge>}
+              {telegramStatus === 'ok' && <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 gap-1 text-xs"><CheckCircle className="w-3 h-3" />{t('settings.telegramConnected')}</Badge>}
+              {telegramStatus === 'fail' && <Badge className="bg-destructive/10 text-destructive gap-1 text-xs"><XCircle className="w-3 h-3" />{t('settings.telegramFailed')}</Badge>}
+              {webhookStatus === 'ok' && <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 gap-1 text-xs"><Link2 className="w-3 h-3" />{t('settings.webhookActive')}</Badge>}
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-1">รับแจ้งเตือนและสั่งดูรายงาน + ส่งรูปหน้าจอผ่าน Telegram Bot ได้โดยตรง</p>
@@ -413,22 +415,22 @@ export default function SettingsPage() {
                   </FormItem>
                 )} />
                 <div className="flex flex-wrap gap-2">
-                  <Button type="submit" disabled={savingTelegram}><Save className="w-4 h-4 mr-1.5" />{savingTelegram ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+                  <Button type="submit" disabled={savingTelegram}><Save className="w-4 h-4 mr-1.5" />{savingTelegram ? t('settings.saving') : t('settings.saveTelegram')}</Button>
                   <Button type="button" variant="outline" disabled={testingTelegram} onClick={onTestTelegram}>
-                    <Send className="w-4 h-4 mr-1.5" />{testingTelegram ? 'กำลังทดสอบ...' : 'ทดสอบ + เมนู'}
+                    <Send className="w-4 h-4 mr-1.5" />{testingTelegram ? t('settings.saving') : t('settings.testMenu')}
                   </Button>
                   <Button type="button" variant="outline" disabled={registeringWebhook} onClick={onRegisterWebhook}>
-                    <Link2 className="w-4 h-4 mr-1.5" />{registeringWebhook ? 'กำลังลงทะเบียน...' : 'ตั้งค่า Webhook'}
+                    <Link2 className="w-4 h-4 mr-1.5" />{registeringWebhook ? t('settings.registeringWebhook') : t('settings.registerWebhook')}
                   </Button>
                 </div>
                 <div className="p-3 bg-muted rounded-lg space-y-2">
-                  <p className="text-xs font-medium text-foreground">Webhook URL:</p>
+                  <p className="text-xs font-medium text-foreground">{t('settings.webhookUrl')}</p>
                   <div className="flex items-center gap-2">
                     <code className="text-xs text-muted-foreground bg-background border border-border rounded px-2 py-1 flex-1 min-w-0 truncate">
                       {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`}
                     </code>
                     <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0"
-                      onClick={() => { navigator.clipboard.writeText(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`); toast.success('คัดลอก URL แล้ว'); }}>
+                      onClick={() => { navigator.clipboard.writeText(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`); toast.success(t('settings.urlCopied')); }}>
                       <Copy className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -468,11 +470,11 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Tag className="w-4 h-4 text-primary" />ป้ายสถานะ / Badges (Discord-style)
+                <Tag className="w-4 h-4 text-primary" />{t('settings.badgeTitle')}
               </CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">สร้าง Badge แบบกำหนดเองได้ไม่จำกัด สามารถมอบหลาย Badge ให้ผู้ใช้คนเดียวได้</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('settings.badgeSubtitle')}</p>
             </div>
-            <Button size="sm" onClick={openBadgeCreate}><Plus className="w-4 h-4 mr-1" />สร้าง Badge</Button>
+            <Button size="sm" onClick={openBadgeCreate}><Plus className="w-4 h-4 mr-1" />{t('settings.createBadge')}</Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -480,11 +482,11 @@ export default function SettingsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">Badge</TableHead>
-                  <TableHead className="whitespace-nowrap">ชื่อ</TableHead>
-                  <TableHead className="whitespace-nowrap">คำอธิบาย</TableHead>
-                  <TableHead className="whitespace-nowrap text-right">ลำดับ</TableHead>
-                  <TableHead className="whitespace-nowrap text-right">จัดการ</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeName')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeNameCol')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeDesc')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeOrder')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeManage')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -495,7 +497,7 @@ export default function SettingsPage() {
                 ) : storeRoles.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
-                      ยังไม่มี Badge กดปุ่ม "สร้าง Badge" เพื่อเริ่มต้น
+                      {t('settings.noBadges')}
                     </TableCell>
                   </TableRow>
                 ) : storeRoles.map(badge => (
@@ -529,8 +531,8 @@ export default function SettingsPage() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold">หมวดหมู่สินค้า</CardTitle>
-            <Button size="sm" onClick={openCatCreate}><Plus className="w-4 h-4 mr-1" />เพิ่ม</Button>
+            <CardTitle className="text-base font-semibold">{t('settings.categoriesTitle')}</CardTitle>
+            <Button size="sm" onClick={openCatCreate}><Plus className="w-4 h-4 mr-1" />{t('settings.addCategory')}</Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -538,10 +540,10 @@ export default function SettingsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">ชื่อหมวดหมู่</TableHead>
-                  <TableHead className="whitespace-nowrap">คำอธิบาย</TableHead>
-                  <TableHead className="whitespace-nowrap text-right">ลำดับ</TableHead>
-                  <TableHead className="whitespace-nowrap text-right">จัดการ</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.categoryName')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('settings.badgeDesc')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeOrder')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">{t('settings.badgeManage')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -551,7 +553,7 @@ export default function SettingsPage() {
                   ))
                 ) : categories.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">ยังไม่มีหมวดหมู่</TableCell>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">{t('settings.noCategories')}</TableCell>
                   </TableRow>
                 ) : categories.map(cat => (
                   <TableRow key={cat.id} className="hover:bg-muted/30">
@@ -577,12 +579,12 @@ export default function SettingsPage() {
         <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Tag className="w-5 h-5" />{editBadge ? 'แก้ไข Badge' : 'สร้าง Badge ใหม่'}
+              <Tag className="w-5 h-5" />{editBadge ? t('settings.editBadgeTitle') : t('settings.newBadge')}
             </DialogTitle>
           </DialogHeader>
           {/* Preview */}
           <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-            <span className="text-xs text-muted-foreground">ตัวอย่าง:</span>
+            <span className="text-xs text-muted-foreground">{t('settings.preview')}</span>
             <span
               className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium"
               style={{ backgroundColor: (watchColor || '#6366f1') + '33', color: watchColor || '#6366f1', border: `1px solid ${watchColor || '#6366f1'}66` }}
@@ -595,14 +597,14 @@ export default function SettingsPage() {
               <div className="grid grid-cols-3 gap-3">
                 <FormField control={badgeForm.control} name="emoji" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-normal">Emoji</FormLabel>
+                    <FormLabel className="text-sm font-normal">{t('settings.emojiLabel')}</FormLabel>
                     <FormControl><Input {...field} placeholder="🏷️" className="text-center text-lg" maxLength={4} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={badgeForm.control} name="name" render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel className="text-sm font-normal">ชื่อ Badge *</FormLabel>
+                    <FormLabel className="text-sm font-normal">{t('settings.badgeNameCol')} *</FormLabel>
                     <FormControl><Input {...field} placeholder="เช่น Senior Staff, MVP" /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -610,7 +612,7 @@ export default function SettingsPage() {
               </div>
               <FormField control={badgeForm.control} name="color" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-normal">สี Badge</FormLabel>
+                  <FormLabel className="text-sm font-normal">{t('settings.badgeColorLabel')}</FormLabel>
                   <div className="space-y-2">
                     {/* Preset colors */}
                     <div className="flex flex-wrap gap-2">
@@ -636,7 +638,7 @@ export default function SettingsPage() {
               )} />
               {/* Preset emojis */}
               <div>
-                <p className="text-sm font-normal mb-2">Emoji ยอดนิยม</p>
+                <p className="text-sm font-normal mb-2">{t('settings.presetEmojis')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {PRESET_EMOJIS.map(e => (
                     <button key={e} type="button" onClick={() => badgeForm.setValue('emoji', e)}
@@ -655,14 +657,14 @@ export default function SettingsPage() {
               )} />
               <FormField control={badgeForm.control} name="sort_order" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-normal">ลำดับการแสดงผล</FormLabel>
+                  <FormLabel className="text-sm font-normal">{t('settings.displayOrder')}</FormLabel>
                   <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <DialogFooter className="gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => setShowBadgeForm(false)} disabled={savingBadge}>ยกเลิก</Button>
-                <Button type="submit" disabled={savingBadge}>{savingBadge ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+                <Button type="button" variant="outline" onClick={() => setShowBadgeForm(false)} disabled={savingBadge}>{t('common.cancel')}</Button>
+                <Button type="submit" disabled={savingBadge}>{savingBadge ? t('settings.saving') : t('common.save')}</Button>
               </DialogFooter>
             </form>
           </Form>
@@ -672,13 +674,13 @@ export default function SettingsPage() {
       {/* Category Form Dialog */}
       <Dialog open={showCatForm} onOpenChange={v => { if (!v) setShowCatForm(false); }}>
         <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-sm">
-          <DialogHeader><DialogTitle>{editCat ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่'}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editCat ? t('settings.editCategoryTitle') : t('settings.addCategoryTitle')}</DialogTitle></DialogHeader>
           <Form {...catForm}>
             <form onSubmit={catForm.handleSubmit(onSaveCat)} className="space-y-4">
               <FormField control={catForm.control} name="name" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-normal">ชื่อหมวดหมู่ *</FormLabel>
-                  <FormControl><Input {...field} placeholder="เช่น อาหาร, เครื่องดื่ม" autoFocus /></FormControl>
+                  <FormLabel className="text-sm font-normal">{t('settings.categoryName')}</FormLabel>
+                  <FormControl><Input {...field} placeholder={t('settings.categoryNamePlaceholder')} autoFocus /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -691,14 +693,14 @@ export default function SettingsPage() {
               )} />
               <FormField control={catForm.control} name="sort_order" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-normal">ลำดับการแสดงผล</FormLabel>
+                  <FormLabel className="text-sm font-normal">{t('settings.displayOrder')}</FormLabel>
                   <FormControl><Input {...field} type="number" min={0} className="w-24" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <DialogFooter className="gap-2">
-                <Button type="button" variant="outline" onClick={() => setShowCatForm(false)} disabled={savingCat}>ยกเลิก</Button>
-                <Button type="submit" disabled={savingCat}>{savingCat ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+                <Button type="button" variant="outline" onClick={() => setShowCatForm(false)} disabled={savingCat}>{t('common.cancel')}</Button>
+                <Button type="submit" disabled={savingCat}>{savingCat ? t('settings.saving') : t('common.save')}</Button>
               </DialogFooter>
             </form>
           </Form>
@@ -709,15 +711,14 @@ export default function SettingsPage() {
       <AlertDialog open={!!deleteBadge} onOpenChange={v => { if (!v) setDeleteBadge(null); }}>
         <AlertDialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>ลบ Badge</AlertDialogTitle>
+            <AlertDialogTitle>{t('settings.deleteBadgeTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ต้องการลบ Badge <strong>{deleteBadge?.emoji} {deleteBadge?.name}</strong>?<br />
-              Badge นี้จะถูกถอดออกจากผู้ใช้ทุกคนที่มีอยู่
+              {t('settings.deleteBadgeDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteBadge} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ลบ Badge</AlertDialogAction>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBadge} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('common.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -726,15 +727,14 @@ export default function SettingsPage() {
       <AlertDialog open={!!deleteCat} onOpenChange={v => { if (!v) setDeleteCat(null); }}>
         <AlertDialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>ลบหมวดหมู่</AlertDialogTitle>
+            <AlertDialogTitle>{t('settings.deleteCategory')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ต้องการลบหมวดหมู่ <strong>{deleteCat?.name}</strong>?<br />
-              สินค้าในหมวดหมู่นี้จะถูกย้ายไปหมวดหมู่ "ไม่ระบุ"
+              {t('settings.deleteCategoryDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteCat} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ลบหมวดหมู่</AlertDialogAction>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCat} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('common.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -107,6 +107,7 @@ export interface StoreSettings {
   telegram_bot_token: string | null;
   telegram_chat_id: string | null;
   max_void_per_day: number;
+  logo_url: string | null;
   updated_at: string;
 }
 

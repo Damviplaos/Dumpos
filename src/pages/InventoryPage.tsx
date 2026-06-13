@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Package, Pencil, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/db/supabase';
@@ -13,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default function InventoryPage() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const { log } = useAuditLog();
   const [products, setProducts] = useState<Product[]>([]);
@@ -47,10 +49,10 @@ export default function InventoryPage() {
 
   const saveStock = async (product: Product) => {
     const newStock = parseInt(editStock);
-    if (isNaN(newStock) || newStock < 0) { toast.error('จำนวนสต็อกต้องเป็นตัวเลขที่ไม่ติดลบ'); return; }
+    if (isNaN(newStock) || newStock < 0) { toast.error(t('inventory.invalidStock')); return; }
     const prevStock = product.stock;
     const { error } = await supabase.from('products').update({ stock: newStock }).eq('id', product.id);
-    if (error) { toast.error('อัปเดตสต็อกไม่สำเร็จ'); return; }
+    if (error) { toast.error(t('inventory.updateFailed')); return; }
     await supabase.from('inventory_logs').insert({
       product_id: product.id,
       change_amount: newStock - prevStock,
@@ -59,7 +61,7 @@ export default function InventoryPage() {
       reason: 'manual_adjust',
       store_id: profile?.store_id ?? null,
     });
-    toast.success(`อัปเดตสต็อก ${product.name} แล้ว`);
+    toast.success(`${t('inventory.updated')} ${product.name}`);
 
     // บันทึก audit log + ตรวจสอบการโกงสต็อก
     const diff = newStock - prevStock;
@@ -134,13 +136,13 @@ export default function InventoryPage() {
         </TableCell>
         <TableCell className="whitespace-nowrap text-center">
           {isOut ? (
-            <Badge variant="secondary" className="bg-destructive/10 text-destructive text-xs">หมด</Badge>
+            <Badge variant="secondary" className="bg-destructive/10 text-destructive text-xs">{t('inventory.outOfStock')}</Badge>
           ) : isLow ? (
             <Badge variant="secondary" className="bg-warning/10 text-warning text-xs flex items-center gap-1 w-fit mx-auto">
-              <AlertTriangle className="w-3 h-3" />ใกล้หมด
+              <AlertTriangle className="w-3 h-3" />{t('inventory.lowStock')}
             </Badge>
           ) : (
-            <Badge variant="secondary" className="bg-success/10 text-success text-xs">ปกติ</Badge>
+            <Badge variant="secondary" className="bg-success/10 text-success text-xs">{t('inventory.normal')}</Badge>
           )}
         </TableCell>
         <TableCell className="whitespace-nowrap text-right">
@@ -160,11 +162,11 @@ export default function InventoryPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="whitespace-nowrap">สินค้า</TableHead>
-              <TableHead className="whitespace-nowrap">หมวดหมู่</TableHead>
-              <TableHead className="whitespace-nowrap text-right">จำนวนสต็อก</TableHead>
-              <TableHead className="whitespace-nowrap text-center">สถานะ</TableHead>
-              <TableHead className="whitespace-nowrap text-right">แก้ไข</TableHead>
+              <TableHead className="whitespace-nowrap">{t('inventory.product')}</TableHead>
+              <TableHead className="whitespace-nowrap">{t('inventory.category')}</TableHead>
+              <TableHead className="whitespace-nowrap text-right">{t('inventory.stockQty')}</TableHead>
+              <TableHead className="whitespace-nowrap text-center">{t('common.status')}</TableHead>
+              <TableHead className="whitespace-nowrap text-right">{t('common.edit')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -179,7 +181,7 @@ export default function InventoryPage() {
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
-                  ไม่มีรายการ
+                  {t('common.noItems')}
                 </TableCell>
               </TableRow>
             ) : rows.map(stockRow)}
@@ -192,22 +194,22 @@ export default function InventoryPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold text-foreground text-balance">จัดการสต็อกสินค้า</h2>
+        <h2 className="text-xl font-bold text-foreground text-balance">{t('inventory.title')}</h2>
         <div className="flex flex-wrap gap-3 mt-2">
-          <span className="text-sm text-muted-foreground">สินค้าทั้งหมด: <strong>{products.length}</strong></span>
-          <span className="text-sm text-warning">ใกล้หมด: <strong>{lowStock.length}</strong></span>
-          <span className="text-sm text-destructive">หมดสต็อก: <strong>{outOfStock.length}</strong></span>
+          <span className="text-sm text-muted-foreground">{t('inventory.total')}: <strong>{products.length}</strong></span>
+          <span className="text-sm text-warning">{t('inventory.lowStock')}: <strong>{lowStock.length}</strong></span>
+          <span className="text-sm text-destructive">{t('inventory.outOfStock')}: <strong>{outOfStock.length}</strong></span>
         </div>
       </div>
 
       <Tabs defaultValue="all">
         <TabsList className="mb-4">
-          <TabsTrigger value="all">ทั้งหมด ({products.length})</TabsTrigger>
+          <TabsTrigger value="all">{t('common.all')} ({products.length})</TabsTrigger>
           <TabsTrigger value="low" className="text-warning data-[state=active]:text-warning">
-            ใกล้หมด ({lowStock.length})
+            {t('inventory.lowStock')} ({lowStock.length})
           </TabsTrigger>
           <TabsTrigger value="out" className="text-destructive data-[state=active]:text-destructive">
-            หมด ({outOfStock.length})
+            {t('inventory.outOfStock')} ({outOfStock.length})
           </TabsTrigger>
         </TabsList>
         <TabsContent value="all">{renderTable(products)}</TabsContent>
