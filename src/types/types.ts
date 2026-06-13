@@ -202,6 +202,28 @@ export interface InventoryLog {
   creator?: Profile | null;
 }
 
+// ============ Discord-style store badges ============
+export interface StoreRole {
+  id: string;
+  store_id: string;
+  name: string;
+  color: string;   // hex e.g. "#6366f1"
+  emoji: string;
+  description: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface UserBadgeAssignment {
+  id: string;
+  user_id: string;
+  role_id: string;
+  assigned_by: string | null;
+  assigned_at: string;
+  // joined
+  store_role?: StoreRole;
+}
+
 // ประเภทสำหรับตะกร้าสินค้า POS
 export interface CartItem {
   product: Product;

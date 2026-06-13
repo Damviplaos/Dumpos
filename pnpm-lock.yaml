@@ -119,6 +119,9 @@ importers:
       eventsource-parser:
         specifier: ^3.0.6
         version: 3.0.6
+      html2canvas:
+        specifier: ^1.4.1
+        version: 1.4.1
       i18next:
         specifier: ^26.3.1
         version: 26.3.1(typescript@5.9.3)
@@ -137,9 +140,12 @@ importers:
       miaoda-auth-react:
         specifier: 2.0.6
         version: 2.0.6(@supabase/supabase-js@2.103.1)(react-dom@18.3.1(react@18.3.1))(react-router-dom@7.9.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      miaoda-react-devkit:
+        specifier: 0.1.1-beta.14
+        version: 0.1.1-beta.14(miaoda-sc-plugin@1.0.62(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1)))(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1))
       miaoda-sc-plugin:
-        specifier: 1.0.61
-        version: 1.0.61(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1))
+        specifier: 1.0.62
+        version: 1.0.62(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1))
       motion:
         specifier: ^12.23.25
         version: 12.23.25(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1756,6 +1762,10 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
+  base64-arraybuffer@1.0.2:
+    resolution: {integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==}
+    engines: {node: '>= 0.6.0'}
+
   baseline-browser-mapping@2.10.0:
     resolution: {integrity: sha512-lIyg0szRfYbiy67j9KN8IyeD7q7hcmqnJ1ddWmNt19ItGpNN64mnllmxUNFIOdOm6by97jlL6wfpTTJrmnjWAA==}
     engines: {node: '>=6.0.0'}
@@ -1903,6 +1913,9 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
+
+  css-line-break@2.1.0:
+    resolution: {integrity: sha512-FHcKFCZcAha3LwfVBhCQbW2nCNbkZXn7KVUJcsT5/P8YmfsVja0FMPJr0B903j/E69HUphKiV9iQArX8SDYA4w==}
 
   cssesc@3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
@@ -2203,7 +2216,7 @@ packages:
     engines: {node: '>=12'}
 
   esprima@4.0.1:
-    resolution: {integrity: sha1-E7BM2z5sXRnfkatph6hpVhmwqnE=}
+    resolution: {integrity: sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==}
     engines: {node: '>=4'}
     hasBin: true
 
@@ -2402,6 +2415,10 @@ packages:
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
+
+  html2canvas@1.4.1:
+    resolution: {integrity: sha512-fPU6BHNpsyIhr8yyMpTLLxAbkaK8ArIBcmZIRiBLiDhjeqvXolaEmDGmELFuX9I4xDcaKKcJl+TKZLqruBbmWA==}
+    engines: {node: '>=8.0.0'}
 
   i18next-browser-languagedetector@8.2.1:
     resolution: {integrity: sha512-bZg8+4bdmaOiApD7N7BPT9W8MLZG+nPTOFlLiJiT8uzKXFjhxw4v2ierCXOwB5sFDMtuA5G4kgYZ0AznZxQ/cw==}
@@ -2744,8 +2761,25 @@ packages:
       react-dom: '*'
       react-router-dom: '*'
 
-  miaoda-sc-plugin@1.0.61:
-    resolution: {integrity: sha512-+VRabZjO+Iu3IGgjSA8tMb4hN9u6FJo7JsvnvuXdF7lzvI0VQsHWo8Q+2+YG2maOA1tHBSn5meR7W/fcapdChg==}
+  miaoda-react-devkit@0.1.1-beta.14:
+    resolution: {integrity: sha512-4PpZRBSIbYuATDMGbvdzwGzHqxzOx85PMhsZRdqf3BRBXf1pjPrv5b/xHfSQ1vRa0MV0TNB5y2IhVWKV0aXg7A==}
+    peerDependencies:
+      '@sentry/core': '>=8.0.0'
+      '@sentry/react': '>=8.0.0'
+      miaoda-sc-plugin: '>=1.0.0'
+      vite: '>=5.0.0'
+    peerDependenciesMeta:
+      '@sentry/core':
+        optional: true
+      '@sentry/react':
+        optional: true
+      miaoda-sc-plugin:
+        optional: true
+      vite:
+        optional: true
+
+  miaoda-sc-plugin@1.0.62:
+    resolution: {integrity: sha512-Ui6i3zuLzdeGT/N7LGGK0n7XHkZDhr5tSfcwgnvuLz5doFh835zDy7B5sZg7Z4J4cOu/32dYMAW9hgGCIb+Kxw==}
     peerDependencies:
       vite: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
 
@@ -3395,7 +3429,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   source-map@0.6.1:
-    resolution: {integrity: sha1-dHIq8y6WFOnCh6jQu95IteLxomM=}
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
   space-separated-tokens@2.0.2:
@@ -3463,6 +3497,9 @@ packages:
     resolution: {integrity: sha512-w33E2aCvSDP0tW9RZuNXadXlkHXqFzSkQew/aIa2i/Sj8fThxwovwlXHSPXTbAHwEIhBFXAedUhP2tueAKP8Og==}
     engines: {node: '>=14.0.0'}
     hasBin: true
+
+  text-segmentation@1.0.3:
+    resolution: {integrity: sha512-iOiPUo/BGnZ6+54OsWxZidGCsdU8YbE4PSpdPinp7DeMtUJNJBoJ/ouUSTJjHkh1KntHaltHl/gDs2FC4i5+Nw==}
 
   thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
@@ -3574,6 +3611,9 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  utrie@1.0.2:
+    resolution: {integrity: sha512-1MLa5ouZiOmQzUbjbu9VmjLzn1QLXBhwpUa7kdLUQK+KQ5KA9I1vk5U4YHe/X2Ch7PYnJfWuWT+VbuxbGwljhw==}
 
   uuid@11.1.0:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
@@ -5224,6 +5264,8 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
+  base64-arraybuffer@1.0.2: {}
+
   baseline-browser-mapping@2.10.0: {}
 
   binary-extensions@2.3.0: {}
@@ -5369,6 +5411,10 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  css-line-break@2.1.0:
+    dependencies:
+      utrie: 1.0.2
 
   cssesc@3.0.0: {}
 
@@ -5928,6 +5974,11 @@ snapshots:
 
   html-void-elements@3.0.0: {}
 
+  html2canvas@1.4.1:
+    dependencies:
+      css-line-break: 2.1.0
+      text-segmentation: 1.0.3
+
   i18next-browser-languagedetector@8.2.1:
     dependencies:
       '@babel/runtime': 7.28.2
@@ -6341,7 +6392,18 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       react-router-dom: 7.9.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  miaoda-sc-plugin@1.0.61(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1)):
+  miaoda-react-devkit@0.1.1-beta.14(miaoda-sc-plugin@1.0.62(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1)))(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1)):
+    dependencies:
+      '@babel/parser': 7.29.0
+      '@babel/traverse': 7.29.0
+      '@babel/types': 7.29.0
+    optionalDependencies:
+      miaoda-sc-plugin: 1.0.62(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1))
+      vite: rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  miaoda-sc-plugin@1.0.62(rolldown-vite@7.3.1(@types/node@24.2.1)(jiti@1.21.7)(yaml@2.8.1)):
     dependencies:
       '@babel/parser': 7.29.0
       '@babel/traverse': 7.29.0
@@ -7260,6 +7322,10 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
+  text-segmentation@1.0.3:
+    dependencies:
+      utrie: 1.0.2
+
   thenify-all@1.6.0:
     dependencies:
       thenify: 3.3.1
@@ -7370,6 +7436,10 @@ snapshots:
       react: 18.3.1
 
   util-deprecate@1.0.2: {}
+
+  utrie@1.0.2:
+    dependencies:
+      base64-arraybuffer: 1.0.2
 
   uuid@11.1.0: {}
 

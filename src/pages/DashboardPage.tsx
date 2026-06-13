@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { TrendingUp, ShoppingBag, DollarSign, Package, AlertTriangle, CalendarDays, ChevronDown } from 'lucide-react';
+import { TrendingUp, ShoppingBag, DollarSign, Package, AlertTriangle, CalendarDays, ChevronDown, Camera } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { supabase } from '@/db/supabase';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { sendScreenshotToTelegram } from '@/hooks/useTelegramScreenshot';
 import type { Transaction, Product } from '@/types/types';
 
 interface DashboardStats {
@@ -148,7 +149,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" id="dashboard-capture">
       {/* Header + date range picker */}
       <div className="flex flex-col md:flex-row md:items-center gap-3">
         <div>
@@ -156,6 +157,15 @@ export default function DashboardPage() {
           <p className="text-sm text-muted-foreground mt-0.5">สรุปภาพรวมของร้าน</p>
         </div>
         <div className="md:ml-auto flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => sendScreenshotToTelegram({ elementId: 'dashboard-capture', caption: `📊 แดชบอร์ด — ${activeLabel}` })}
+            title="ส่งรูปหน้าจอไป Telegram"
+          >
+            <Camera className="w-4 h-4 mr-1.5" />
+            <span className="hidden md:inline">ส่งรูปไป Telegram</span>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2 min-w-0">
