@@ -131,6 +131,7 @@ export default function TransactionsPage() {
         p_user_id: profile.id,
         p_username: profile.username,
         p_max_voids: 5,
+        p_store_id: profile.store_id ?? null,
       });
     }
 

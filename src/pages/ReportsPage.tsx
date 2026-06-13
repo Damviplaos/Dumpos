@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react';
-import { CalendarDays, TrendingUp, TrendingDown, DollarSign, ShoppingBag, Package } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { CalendarDays, TrendingUp, TrendingDown, DollarSign, ShoppingBag, Package, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import { supabase } from '@/db/supabase';
 import { formatCurrency, formatDate } from '@/lib/utils';
-
-type Period = 'week' | 'month' | 'year';
 
 interface SalesSummary {
   totalSales: number;
@@ -20,56 +22,114 @@ interface SalesSummary {
   avgOrderValue: number;
 }
 
-interface TopProduct {
-  name: string;
-  qty: number;
-  revenue: number;
-}
-
-interface ChartPoint {
-  label: string;
-  ยอดขาย: number;
-  กำไร: number;
-}
+interface TopProduct { name: string; qty: number; revenue: number; }
+interface ChartPoint { label: string; ยอดขาย: number; กำไร: number; }
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
+type PresetKey = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'custom';
+const PRESETS: { key: PresetKey; label: string }[] = [
+  { key: 'today', label: 'วันนี้' },
+  { key: 'yesterday', label: 'เมื่อวาน' },
+  { key: 'week', label: '7 วันล่าสุด' },
+  { key: 'month', label: 'เดือนนี้' },
+  { key: 'year', label: 'ปีนี้' },
+  { key: 'custom', label: 'กำหนดเอง' },
+];
+
+function toDateStr(d: Date) { return d.toISOString().split('T')[0]; }
+
+function getPresetRange(key: PresetKey): { from: string; to: string } {
+  const now = new Date();
+  const today = toDateStr(now);
+  if (key === 'today') return { from: today, to: today };
+  if (key === 'yesterday') {
+    const y = new Date(now); y.setDate(now.getDate() - 1); const ys = toDateStr(y);
+    return { from: ys, to: ys };
+  }
+  if (key === 'week') {
+    const w = new Date(now); w.setDate(now.getDate() - 6);
+    return { from: toDateStr(w), to: today };
+  }
+  if (key === 'month') {
+    return { from: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`, to: today };
+  }
+  if (key === 'year') {
+    return { from: `${now.getFullYear()}-01-01`, to: today };
+  }
+  return { from: today, to: today };
+}
+
+// Build chart labels based on range length
+function buildChartData(txArr: any[], from: string, to: string): ChartPoint[] {
+  const start = new Date(`${from}T00:00:00`);
+  const end = new Date(`${to}T00:00:00`);
+  const diffDays = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+  const points: ChartPoint[] = [];
+
+  if (diffDays <= 31) {
+    // Daily breakdown
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const ds = toDateStr(d);
+      const dayTx = txArr.filter((t: any) => t.created_at?.startsWith(ds));
+      const sales = dayTx.reduce((s: number, t: any) => s + (t.total || 0), 0);
+      const profit = dayTx.reduce((s: number, t: any) =>
+        s + (Array.isArray(t.items) ? t.items : []).reduce((si: number, i: any) => si + ((i.unit_price - i.cost) * i.quantity), 0), 0);
+      points.push({ label: formatDate(new Date(ds), 'short'), ยอดขาย: Math.round(sales), กำไร: Math.round(profit) });
+    }
+  } else {
+    // Monthly breakdown
+    const months: Record<string, ChartPoint> = {};
+    txArr.forEach((t: any) => {
+      const mo = t.created_at?.slice(0, 7); // "2025-06"
+      if (!mo) return;
+      if (!months[mo]) {
+        const d = new Date(mo + '-01');
+        const label = d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' });
+        months[mo] = { label, ยอดขาย: 0, กำไร: 0 };
+      }
+      months[mo].ยอดขาย += Math.round(t.total || 0);
+      const profit = (Array.isArray(t.items) ? t.items : []).reduce((si: number, i: any) => si + ((i.unit_price - i.cost) * i.quantity), 0);
+      months[mo].กำไร += Math.round(profit);
+    });
+    Object.keys(months).sort().forEach(k => points.push(months[k]));
+  }
+  return points;
+}
+
 export default function ReportsPage() {
-  const [period, setPeriod] = useState<Period>('week');
+  const [preset, setPreset] = useState<PresetKey>('week');
+  const [customFrom, setCustomFrom] = useState(toDateStr(new Date()));
+  const [customTo, setCustomTo] = useState(toDateStr(new Date()));
+  const [showCustom, setShowCustom] = useState(false);
+
   const [summary, setSummary] = useState<SalesSummary | null>(null);
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadReport(period); }, [period]);
+  const getRange = useCallback(() => {
+    if (preset === 'custom') return { from: customFrom, to: customTo };
+    return getPresetRange(preset);
+  }, [preset, customFrom, customTo]);
 
-  const loadReport = async (p: Period) => {
+  const loadReport = useCallback(async () => {
     setLoading(true);
-    const now = new Date();
-    let start: Date;
-    if (p === 'week') {
-      start = new Date(now); start.setDate(now.getDate() - 6);
-    } else if (p === 'month') {
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else {
-      start = new Date(now.getFullYear(), 0, 1);
-    }
-    start.setHours(0, 0, 0, 0);
+    const { from, to } = getRange();
 
     const { data: txData } = await supabase
       .from('transactions')
-      .select('*, items:transaction_items(product_name, quantity, unit_price, cost, subtotal)')
-      .gte('created_at', start.toISOString())
+      .select('total, created_at, items:transaction_items(product_name, quantity, unit_price, cost, subtotal)')
+      .gte('created_at', `${from}T00:00:00`)
+      .lte('created_at', `${to}T23:59:59`)
       .eq('status', 'completed')
       .order('created_at');
 
     const txArr = Array.isArray(txData) ? txData : [];
-    const totalSales = txArr.reduce((s: number, t: any) => s + t.total, 0);
+    const totalSales = txArr.reduce((s: number, t: any) => s + (t.total || 0), 0);
     const totalOrders = txArr.length;
-    const totalProfit = txArr.reduce((s: number, t: any) => {
-      const items = Array.isArray(t.items) ? t.items : [];
-      return s + items.reduce((si: number, i: any) => si + ((i.unit_price - i.cost) * i.quantity), 0);
-    }, 0);
+    const totalProfit = txArr.reduce((s: number, t: any) =>
+      s + (Array.isArray(t.items) ? t.items : []).reduce((si: number, i: any) => si + ((i.unit_price - i.cost) * i.quantity), 0), 0);
     const profitMargin = totalSales > 0 ? (totalProfit / totalSales) * 100 : 0;
     const avgOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
     setSummary({ totalSales, totalOrders, totalProfit, profitMargin, avgOrderValue });
@@ -78,87 +138,84 @@ export default function ReportsPage() {
     const productMap: Record<string, TopProduct> = {};
     txArr.forEach((t: any) => {
       (Array.isArray(t.items) ? t.items : []).forEach((i: any) => {
-        if (!productMap[i.product_name]) {
-          productMap[i.product_name] = { name: i.product_name, qty: 0, revenue: 0 };
-        }
+        if (!productMap[i.product_name]) productMap[i.product_name] = { name: i.product_name, qty: 0, revenue: 0 };
         productMap[i.product_name].qty += i.quantity;
-        productMap[i.product_name].revenue += i.subtotal;
+        productMap[i.product_name].revenue += i.subtotal || (i.unit_price * i.quantity);
       });
     });
     setTopProducts(Object.values(productMap).sort((a, b) => b.qty - a.qty).slice(0, 10));
-
-    // Chart data
-    if (p === 'week') {
-      const days: ChartPoint[] = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(now); d.setDate(now.getDate() - i);
-        const ds = d.toISOString().split('T')[0];
-        const dayTx = txArr.filter((t: any) => t.created_at.startsWith(ds));
-        const sales = dayTx.reduce((s: number, t: any) => s + t.total, 0);
-        const profit = dayTx.reduce((s: number, t: any) => {
-          const items = Array.isArray(t.items) ? t.items : [];
-          return s + items.reduce((si: number, it: any) => si + ((it.unit_price - it.cost) * it.quantity), 0);
-        }, 0);
-        days.push({ label: formatDate(d, 'short'), ยอดขาย: Math.round(sales), กำไร: Math.round(profit) });
-      }
-      setChartData(days);
-    } else if (p === 'month') {
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const days: ChartPoint[] = [];
-      for (let d = 1; d <= daysInMonth; d++) {
-        const ds = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const dayTx = txArr.filter((t: any) => t.created_at.startsWith(ds));
-        const sales = dayTx.reduce((s: number, t: any) => s + t.total, 0);
-        const profit = dayTx.reduce((s: number, t: any) => {
-          const items = Array.isArray(t.items) ? t.items : [];
-          return s + items.reduce((si: number, it: any) => si + ((it.unit_price - it.cost) * it.quantity), 0);
-        }, 0);
-        days.push({ label: `${d}`, ยอดขาย: Math.round(sales), กำไร: Math.round(profit) });
-      }
-      setChartData(days);
-    } else {
-      const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-      const pts: ChartPoint[] = months.map((label, mi) => {
-        const monthTx = txArr.filter((t: any) => new Date(t.created_at).getMonth() === mi);
-        const sales = monthTx.reduce((s: number, t: any) => s + t.total, 0);
-        const profit = monthTx.reduce((s: number, t: any) => {
-          const items = Array.isArray(t.items) ? t.items : [];
-          return s + items.reduce((si: number, it: any) => si + ((it.unit_price - it.cost) * it.quantity), 0);
-        }, 0);
-        return { label, ยอดขาย: Math.round(sales), กำไร: Math.round(profit) };
-      });
-      setChartData(pts);
-    }
+    setChartData(buildChartData(txArr, from, to));
     setLoading(false);
+  }, [getRange]);
+
+  useEffect(() => { loadReport(); }, [loadReport]);
+
+  const applyPreset = (key: PresetKey) => {
+    setPreset(key);
+    if (key === 'custom') { setShowCustom(true); return; }
+    setShowCustom(false);
   };
 
-  const periodLabel = { week: '7 วันล่าสุด', month: 'เดือนนี้', year: 'ปีนี้' };
+  const activeLabel = preset === 'custom'
+    ? `${customFrom} — ${customTo}`
+    : PRESETS.find(p => p.key === preset)?.label ?? '7 วันล่าสุด';
 
   const statCards = [
     { title: 'ยอดขายรวม', value: summary ? formatCurrency(summary.totalSales) : '-', icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10' },
     { title: 'จำนวนออเดอร์', value: summary ? `${summary.totalOrders} รายการ` : '-', icon: ShoppingBag, color: 'text-info', bg: 'bg-info/10' },
     { title: 'กำไรรวม', value: summary ? formatCurrency(summary.totalProfit) : '-', icon: TrendingUp, color: 'text-success', bg: 'bg-success/10' },
     { title: 'อัตรากำไร', value: summary ? `${summary.profitMargin.toFixed(1)}%` : '-', icon: TrendingDown, color: 'text-warning', bg: 'bg-warning/10' },
-    { title: 'มูลค่าเฉลี่ย/ออเดอร์', value: summary ? formatCurrency(summary.avgOrderValue) : '-', icon: CalendarDays, color: 'text-chart-4', bg: 'bg-chart-4/10' },
+    { title: 'เฉลี่ย/ออเดอร์', value: summary ? formatCurrency(summary.avgOrderValue) : '-', icon: CalendarDays, color: 'text-chart-4', bg: 'bg-chart-4/10' },
   ];
 
   return (
     <div className="space-y-5">
+      {/* Header + date range picker */}
       <div className="flex flex-col md:flex-row md:items-center gap-3">
         <div>
           <h2 className="text-xl font-bold text-foreground text-balance">รายงาน</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">{periodLabel[period]}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{activeLabel}</p>
         </div>
         <div className="md:ml-auto">
-          <Tabs value={period} onValueChange={v => setPeriod(v as Period)}>
-            <TabsList>
-              <TabsTrigger value="week">7 วัน</TabsTrigger>
-              <TabsTrigger value="month">เดือนนี้</TabsTrigger>
-              <TabsTrigger value="year">ปีนี้</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <CalendarDays className="w-4 h-4 shrink-0" />
+                <span className="truncate max-w-[160px]">{activeLabel}</span>
+                <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {PRESETS.filter(p => p.key !== 'custom').map(p => (
+                <DropdownMenuItem key={p.key} onClick={() => applyPreset(p.key)}
+                  className={preset === p.key ? 'bg-primary/10 text-primary font-medium' : ''}>
+                  {p.label}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => applyPreset('custom')}
+                className={preset === 'custom' ? 'bg-primary/10 text-primary font-medium' : ''}>
+                กำหนดเอง...
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+
+      {/* Custom date range inputs */}
+      {showCustom && (
+        <div className="flex flex-wrap items-end gap-3 p-4 bg-muted/50 rounded-xl border border-border">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground font-medium">จากวันที่</label>
+            <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-9 w-40" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground font-medium">ถึงวันที่</label>
+            <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-9 w-40" />
+          </div>
+          <Button size="sm" onClick={loadReport} className="h-9">ดูรายงาน</Button>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-5 gap-3">
@@ -195,13 +252,15 @@ export default function ReportsPage() {
           <CardContent>
             {loading ? (
               <Skeleton className="w-full h-56 bg-muted" />
+            ) : chartData.length === 0 ? (
+              <div className="flex items-center justify-center h-56 text-muted-foreground text-sm">ไม่มีข้อมูลในช่วงที่เลือก</div>
             ) : (
               <div className="w-full min-w-0 overflow-hidden">
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={chartData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                    <YAxis tickFormatter={v => `฿${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" interval="preserveStartEnd" />
+                    <YAxis tickFormatter={v => `฿${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                     <Tooltip
                       formatter={(value: number, name: string) => [formatCurrency(value), name]}
                       contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
@@ -219,7 +278,7 @@ export default function ReportsPage() {
         {/* Top products pie */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">สินค้าขายดี (ยอดขาย)</CardTitle>
+            <CardTitle className="text-base font-semibold">สินค้าขายดี (ชิ้น)</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -233,20 +292,15 @@ export default function ReportsPage() {
               <div className="w-full min-w-0 overflow-hidden">
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie
-                      data={topProducts.slice(0, 5)}
-                      dataKey="qty"
-                      nameKey="name"
-                      cx="50%" cy="50%"
-                      outerRadius={70}
-                      label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
-                    >
+                    <Pie data={topProducts.slice(0, 5)} dataKey="qty" nameKey="name"
+                      cx="50%" cy="50%" outerRadius={70}
+                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`} labelLine={false}>
                       {topProducts.slice(0, 5).map((_, index) => (
                         <Cell key={index} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number, name: string) => [value + ' ชิ้น', name]} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
+                    <Tooltip formatter={(v: number, name: string) => [v + ' ชิ้น', name]}
+                      contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
                     <Legend layout="horizontal" wrapperStyle={{ paddingTop: 4, fontSize: '11px' }} />
                   </PieChart>
                 </ResponsiveContainer>
@@ -283,12 +337,12 @@ export default function ReportsPage() {
                   ))
                 ) : topProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-8 text-muted-foreground text-sm">ยังไม่มีข้อมูลการขาย</td>
+                    <td colSpan={4} className="text-center py-8 text-muted-foreground text-sm">ยังไม่มีข้อมูลการขายในช่วงที่เลือก</td>
                   </tr>
                 ) : topProducts.map((p, i) => (
                   <tr key={p.name} className="border-b border-border last:border-0 hover:bg-muted/20">
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-bold text-primary-foreground ${i < 3 ? 'bg-primary' : 'bg-muted text-muted-foreground'}`}>
+                      <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-bold ${i < 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                         {i + 1}
                       </span>
                     </td>

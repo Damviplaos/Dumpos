@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, Store, Phone, MapPin, Receipt, Bell, Percent, Plus, Pencil, Trash2, Send, Bot, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Save, Store, Phone, MapPin, Receipt, Bell, Percent, Plus, Pencil, Trash2, Send, Bot, CheckCircle, XCircle, AlertTriangle, Link2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -58,6 +58,8 @@ export default function SettingsPage() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [savingTelegram, setSavingTelegram] = useState(false);
   const [testingTelegram, setTestingTelegram] = useState(false);
+  const [registeringWebhook, setRegisteringWebhook] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState<'idle' | 'ok' | 'fail'>('idle');
   const [telegramStatus, setTelegramStatus] = useState<'idle' | 'ok' | 'fail'>('idle');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
@@ -162,7 +164,8 @@ export default function SettingsPage() {
       body: {
         bot_token: telegram_bot_token,
         chat_id: telegram_chat_id,
-        message: `✅ *ทดสอบการเชื่อมต่อ Telegram*\n\nการเชื่อมต่อ Telegram Bot สำเร็จ!\nร้าน: ${settings?.store_name || 'ร้านของฉัน'}\nเวลา: ${new Date().toLocaleString('th-TH')}`,
+        with_menu: true,
+        message: `✅ *ทดสอบการเชื่อมต่อ Telegram*\n\nการเชื่อมต่อ Telegram Bot สำเร็จ!\nร้าน: ${settings?.store_name || 'ร้านของฉัน'}\nเวลา: ${new Date().toLocaleString('th-TH')}\n\nกดปุ่มด้านล่างเพื่อดูรายงาน 👇`,
       },
     });
     setTestingTelegram(false);
@@ -171,7 +174,42 @@ export default function SettingsPage() {
       toast.error('ทดสอบ Telegram ไม่สำเร็จ: Token หรือ Chat ID ไม่ถูกต้อง');
     } else {
       setTelegramStatus('ok');
-      toast.success('ส่งข้อความทดสอบไปยัง Telegram สำเร็จ!');
+      toast.success('ส่งข้อความทดสอบพร้อมปุ่มเมนูไปยัง Telegram สำเร็จ!');
+    }
+  };
+
+  // Register telegram webhook with Telegram API
+  const onRegisterWebhook = async () => {
+    const { telegram_bot_token } = telegramForm.getValues();
+    if (!telegram_bot_token) {
+      toast.error('กรุณากรอก Bot Token ก่อน');
+      return;
+    }
+    setRegisteringWebhook(true);
+    // Webhook URL = our edge function URL
+    const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`;
+    try {
+      const res = await fetch(
+        `https://api.telegram.org/bot${telegram_bot_token}/setWebhook`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: webhookUrl }),
+        },
+      );
+      const result = await res.json();
+      setRegisteringWebhook(false);
+      if (result.ok) {
+        setWebhookStatus('ok');
+        toast.success('ลงทะเบียน Webhook สำเร็จ! Bot รับคำสั่งได้แล้ว');
+      } else {
+        setWebhookStatus('fail');
+        toast.error('ลงทะเบียน Webhook ไม่สำเร็จ: ' + (result.description || 'unknown error'));
+      }
+    } catch (e) {
+      setRegisteringWebhook(false);
+      setWebhookStatus('fail');
+      toast.error('เกิดข้อผิดพลาด: ' + String(e));
     }
   };
 
@@ -300,24 +338,31 @@ export default function SettingsPage() {
       {/* Telegram Integration Card */}
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Bot className="w-4 h-4 text-primary" />
               Telegram Bot แจ้งเตือน
             </CardTitle>
-            {telegramStatus === 'ok' && (
-              <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 gap-1 text-xs">
-                <CheckCircle className="w-3 h-3" /> เชื่อมต่อแล้ว
-              </Badge>
-            )}
-            {telegramStatus === 'fail' && (
-              <Badge className="bg-destructive/10 text-destructive gap-1 text-xs">
-                <XCircle className="w-3 h-3" /> เชื่อมต่อไม่ได้
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {telegramStatus === 'ok' && (
+                <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 gap-1 text-xs">
+                  <CheckCircle className="w-3 h-3" /> เชื่อมต่อแล้ว
+                </Badge>
+              )}
+              {telegramStatus === 'fail' && (
+                <Badge className="bg-destructive/10 text-destructive gap-1 text-xs">
+                  <XCircle className="w-3 h-3" /> เชื่อมต่อไม่ได้
+                </Badge>
+              )}
+              {webhookStatus === 'ok' && (
+                <Badge className="bg-info/10 text-info gap-1 text-xs">
+                  <Link2 className="w-3 h-3" /> Webhook ใช้งานได้
+                </Badge>
+              )}
+            </div>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            รับแจ้งเตือนผ่าน Telegram เมื่อตรวจพบการโกง, ออกใบเตือนพนักงาน และสถานการณ์สำคัญ
+            รับแจ้งเตือนและสั่งดูรายงานผ่าน Telegram Bot ได้โดยตรง
           </p>
         </CardHeader>
         <CardContent>
@@ -349,28 +394,81 @@ export default function SettingsPage() {
                     <FormControl>
                       <Input {...field} placeholder="-1001234567890 หรือ 123456789" />
                     </FormControl>
-                    <p className="text-xs text-muted-foreground">ส่ง /start ให้ Bot แล้วใช้ @userinfobot หรือ API getUpdates เพื่อรับ Chat ID</p>
+                    <p className="text-xs text-muted-foreground">ส่ง /start ให้ Bot แล้วใช้ @userinfobot เพื่อรับ Chat ID</p>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <div className="flex flex-wrap gap-2">
-                  <Button type="submit" disabled={savingTelegram} className="flex-1 md:flex-none">
+                  <Button type="submit" disabled={savingTelegram}>
                     <Save className="w-4 h-4 mr-1.5" />
-                    {savingTelegram ? 'กำลังบันทึก...' : 'บันทึก Telegram'}
+                    {savingTelegram ? 'กำลังบันทึก...' : 'บันทึก'}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     disabled={testingTelegram}
                     onClick={onTestTelegram}
-                    className="flex-1 md:flex-none"
                   >
                     <Send className="w-4 h-4 mr-1.5" />
-                    {testingTelegram ? 'กำลังทดสอบ...' : 'ทดสอบการส่ง'}
+                    {testingTelegram ? 'กำลังทดสอบ...' : 'ทดสอบ + เมนู'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={registeringWebhook}
+                    onClick={onRegisterWebhook}
+                  >
+                    <Link2 className="w-4 h-4 mr-1.5" />
+                    {registeringWebhook ? 'กำลังลงทะเบียน...' : 'ตั้งค่า Webhook'}
                   </Button>
                 </div>
+
+                {/* Webhook URL display */}
+                <div className="p-3 bg-muted rounded-lg space-y-2">
+                  <p className="text-xs font-medium text-foreground">Webhook URL (สำหรับอ้างอิง):</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs text-muted-foreground bg-background border border-border rounded px-2 py-1 flex-1 min-w-0 truncate">
+                      {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`}
+                    </code>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 shrink-0"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-webhook`,
+                        );
+                        toast.success('คัดลอก URL แล้ว');
+                      }}
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Bot commands info */}
+                <div className="p-3 bg-muted rounded-lg space-y-1.5">
+                  <p className="text-xs font-medium text-foreground">คำสั่งที่รองรับใน Telegram:</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                    {[
+                      ['/start', 'เมนูหลัก'],
+                      ['/today', 'รายงานวันนี้'],
+                      ['/yesterday', 'รายงานเมื่อวาน'],
+                      ['/week', 'ยอดขาย 7 วัน'],
+                      ['/stock', 'สต็อกสินค้าต่ำ'],
+                      ['/alerts', 'แจ้งเตือนล่าสุด'],
+                    ].map(([cmd, desc]) => (
+                      <div key={cmd} className="flex items-center gap-1.5">
+                        <code className="text-xs text-primary font-mono">{cmd}</code>
+                        <span className="text-xs text-muted-foreground">— {desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="p-3 bg-muted rounded-lg space-y-1">
-                  <p className="text-xs font-medium text-foreground">ระบบจะส่งแจ้งเตือนเมื่อ:</p>
+                  <p className="text-xs font-medium text-foreground">ระบบจะส่งแจ้งเตือนอัตโนมัติเมื่อ:</p>
                   <ul className="text-xs text-muted-foreground space-y-0.5 list-disc list-inside">
                     <li>ตรวจพบการพยายามยักยอกทรัพย์ (Critical Alert)</li>
                     <li>มี Fraud Alert ใหม่ทุกระดับความเสี่ยง</li>

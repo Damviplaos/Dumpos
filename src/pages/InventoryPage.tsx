@@ -79,6 +79,7 @@ export default function InventoryPage() {
       await supabase.rpc('check_stock_fraud', {
         p_user_id: profile.id,
         p_username: profile.username,
+        p_store_id: profile.store_id ?? null,
       });
     }
 
