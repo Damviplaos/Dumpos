@@ -1,0 +1,315 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { Eye, EyeOff, ShoppingCart, Lock, User, Zap } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/db/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
+
+const REMEMBER_KEY = 'pos_remembered_username';
+
+const loginSchema = z.object({
+  username: z.string().min(1).regex(/^[a-zA-Z0-9_]+$/),
+  password: z.string().min(6),
+  agree: z.boolean().refine(v => v),
+  rememberMe: z.boolean().optional(),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
+
+// ข้อมูล demo สำหรับทดลองใช้งาน
+const DEMO_USERNAME = 'DUM';
+const DEMO_PASSWORD = 'Dum12345';
+
+export default function LoginPage() {
+  const navigate = useNavigate();
+  const { signInWithUsername } = useAuth();
+  const { t } = useTranslation();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const [storeName, setStoreName] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('store_settings').select('store_name, logo_url').maybeSingle().then(({ data }) => {
+      if (data) { setStoreName(data.store_name ?? null); setLogoUrl((data as any).logo_url ?? null); }
+    });
+  }, []);
+
+  const savedUsername = localStorage.getItem(REMEMBER_KEY) || '';
+
+  const form = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: savedUsername,
+      password: '',
+      agree: false,
+      rememberMe: !!savedUsername,
+    },
+  });
+
+  const onSubmit = async (data: LoginForm) => {
+    // จำ username หรือลบออก
+    if (data.rememberMe) {
+      localStorage.setItem(REMEMBER_KEY, data.username);
+    } else {
+      localStorage.removeItem(REMEMBER_KEY);
+    }
+
+    setIsLoading(true);
+    await doLogin(data.username, data.password, data.rememberMe ?? false);
+    setIsLoading(false);
+  };
+
+  const handleDemoLogin = async () => {
+    // ทดลองใช้งานด้วยบัญชี demo — กดเดียวเข้าได้เลย
+    form.setValue('username', DEMO_USERNAME);
+    form.setValue('password', DEMO_PASSWORD);
+    form.setValue('agree', true);
+    form.setValue('rememberMe', false);
+    setIsDemoLoading(true);
+    await doLogin(DEMO_USERNAME, DEMO_PASSWORD, false);
+    setIsDemoLoading(false);
+  };
+
+  const doLogin = async (username: string, password: string, rememberMe: boolean) => {
+    if (rememberMe) {
+      localStorage.setItem(REMEMBER_KEY, username);
+    }
+
+    const { error, blocked, storeClosed } = await signInWithUsername(username, password);
+    if (error) {
+      if (blocked) {
+        toast.error(t('login.accountSuspended'), { duration: 6000 });
+      } else if (storeClosed) {
+        toast.error(t('login.storeClosed'), { duration: 6000 });
+      } else {
+        toast.error(t('login.invalidCredentials'));
+      }
+      if (!blocked && !storeClosed) {
+        await supabase.from('failed_logins').insert({ username });
+        await supabase.from('audit_logs').insert({
+          user_id: null, username, action: 'failed_login',
+          entity_type: 'auth', entity_id: null, details: {}, severity: 'warning',
+        });
+        await supabase.rpc('check_brute_force', { p_username: username });
+      }
+    } else {
+      toast.success(t('login.loginSuccess'));
+      // query profile ด้วย username ตรงๆ (ไม่ lowercase เพราะ DB เก็บตัวใหญ่-เล็กตามที่สมัคร)
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, store_id')
+        .eq('username', username)
+        .maybeSingle();
+      if (profileData) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        await Promise.all([
+          supabase.from('audit_logs').insert({
+            user_id: profileData.id, username: profileData.username,
+            action: 'login', entity_type: 'auth', entity_id: null, details: {}, severity: 'info',
+          }),
+          supabase.from('attendance_logs').insert({
+            user_id: profileData.id, username: profileData.username,
+            store_id: profileData.store_id ?? null, clock_in_at: now.toISOString(),
+          }),
+        ]);
+
+        // ส่ง Telegram แจ้งเตือนเข้างาน
+        const { data: storeSettings } = await supabase
+          .from('store_settings')
+          .select('telegram_bot_token, telegram_chat_id')
+          .maybeSingle();
+        if (storeSettings?.telegram_bot_token && storeSettings?.telegram_chat_id) {
+          const name = profileData.full_name || profileData.username;
+          const msg = `✅ *เข้างาน*\n👤 ${name}\n📅 ${dateStr}\n🕐 เวลา ${timeStr}`;
+          supabase.functions.invoke('send-telegram', {
+            body: {
+              bot_token: storeSettings.telegram_bot_token,
+              chat_id: storeSettings.telegram_chat_id,
+              message: msg,
+              with_menu: false,
+            },
+          }).catch(() => {/* ไม่บล็อก login หากส่งไม่ได้ */});
+        }
+      }
+      navigate('/');
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      {/* Language switcher — top right */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          {logoUrl ? (
+            <img src={logoUrl} alt="store logo" className="w-16 h-16 rounded-2xl object-contain mb-4 shadow-md bg-card border border-border" />
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-md">
+              <ShoppingCart className="w-8 h-8 text-primary-foreground" />
+            </div>
+          )}
+          <h1 className="text-2xl font-bold text-foreground text-balance">
+            {storeName || t('login.systemName')}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">POS System</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-card rounded-xl border border-border shadow-md p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-5">{t('login.title')}</h2>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-normal">{t('login.username')}</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          placeholder={t('login.usernamePlaceholder')}
+                          className="pl-9"
+                          autoComplete="username"
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-normal">{t('login.password')}</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder={t('login.passwordPlaceholder')}
+                          className="pl-9 pr-10"
+                          autoComplete="current-password"
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* จำชื่อผู้ใช้ */}
+              <FormField
+                control={form.control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center gap-2">
+                      <FormControl>
+                        <Checkbox
+                          checked={!!field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <span className="text-sm text-muted-foreground">{t('login.rememberMe')}</span>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="agree"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-start gap-2 min-h-12">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-0.5"
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <div className="text-sm text-muted-foreground leading-relaxed">
+                        {t('login.agreePrefix')}{' '}
+                        <span className="text-primary cursor-pointer hover:underline">{t('login.termsOfService')}</span>
+                        {' '}{t('login.agreeAnd')}{' '}
+                        <span className="text-primary cursor-pointer hover:underline">{t('login.privacyPolicy')}</span>
+                      </div>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="w-full h-11 font-semibold"
+                disabled={isLoading || isDemoLoading}
+              >
+                {isLoading ? t('login.loggingIn') : t('login.loginButton')}
+              </Button>
+            </form>
+          </Form>
+
+          {/* ปุ่มทดลองใช้งาน — กดเดียวเข้าได้เลย */}
+          <div className="mt-3">
+            <div className="relative flex items-center gap-2 my-2">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground shrink-0">หรือ</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-10 text-sm gap-2"
+              onClick={handleDemoLogin}
+              disabled={isLoading || isDemoLoading}
+            >
+              <Zap className="w-4 h-4 text-primary" />
+              {isDemoLoading ? 'กำลังเข้าสู่ระบบ...' : 'ทดลองใช้งาน (คลิกเดียวเข้าได้เลย)'}
+            </Button>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          © {new Date().getFullYear()} {t('login.copyright')}
+        </p>
+      </div>
+    </div>
+  );
+}
