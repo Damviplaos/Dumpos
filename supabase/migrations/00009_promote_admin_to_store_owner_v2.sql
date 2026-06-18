@@ -1,0 +1,1 @@
+UPDATE profiles SET role = 'store_owner' WHERE role = 'admin';
