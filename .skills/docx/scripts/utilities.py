@@ -356,9 +356,7 @@ def _create_line_tracking_parser():
     """
 
     def set_content_handler(dom_handler):
-        """Monkey-patch startElementNS to attach parse_position to each element."""
         def startElementNS(name, tagName, attrs):
-            """Call the original handler, then record the current line/column on the element."""
             orig_start_cb(name, tagName, attrs)
             cur_elem = dom_handler.elementStack[-1]
             cur_elem.parse_position = (

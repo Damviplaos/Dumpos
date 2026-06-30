@@ -119,7 +119,6 @@ def get_field_info(reader: PdfReader):
 
     # Sort by page number, then Y position (flipped in PDF coordinate system), then X.
     def sort_key(f):
-        """Return (page, [neg_y, x]) sort key so fields are ordered top-to-bottom, left-to-right."""
         if "radio_options" in f:
             rect = f["radio_options"][0]["rect"] or [0, 0, 0, 0]
         else:

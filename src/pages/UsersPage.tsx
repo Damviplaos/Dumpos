@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Shield, AlertTriangle, History, XCircle, Tag, Check, Wifi } from 'lucide-react';
+import { Plus, Pencil, Trash2, Shield, AlertTriangle, History, XCircle, Tag, Check, Wifi, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -47,6 +47,15 @@ const warningSchema = z.object({
   reason: z.string().min(5),
 });
 type WarningForm = z.infer<typeof warningSchema>;
+
+const resetPwSchema = z.object({
+  new_password: z.string().min(8, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'),
+  confirm_password: z.string(),
+}).refine(d => d.new_password === d.confirm_password, {
+  message: 'รหัสผ่านไม่ตรงกัน',
+  path: ['confirm_password'],
+});
+type ResetPwForm = z.infer<typeof resetPwSchema>;
 
 interface OnlineStaff {
   user_id: string;
@@ -112,6 +121,9 @@ export default function UsersPage() {
   const [loadingOnline, setLoadingOnline] = useState(true);
   // permRoleMap: user_id → role ids
   const [permRoleMap, setPermRoleMap] = useState<Record<string, string[]>>({});
+  // Reset password
+  const [resetPwTarget, setResetPwTarget] = useState<Profile | null>(null);
+  const [savingResetPw, setSavingResetPw] = useState(false);
 
   const form = useForm<UserForm>({
     resolver: zodResolver(userSchema),
@@ -120,6 +132,10 @@ export default function UsersPage() {
   const warningForm = useForm<WarningForm>({
     resolver: zodResolver(warningSchema),
     defaultValues: { warning_type: 'yellow_card', reason: '' },
+  });
+  const resetPwForm = useForm<ResetPwForm>({
+    resolver: zodResolver(resetPwSchema),
+    defaultValues: { new_password: '', confirm_password: '' },
   });
 
   useEffect(() => {
@@ -351,6 +367,23 @@ export default function UsersPage() {
     setLoadingHistory(false);
   };
 
+  const onResetPassword = async (data: ResetPwForm) => {
+    if (!resetPwTarget) return;
+    setSavingResetPw(true);
+    try {
+      const { error } = await supabase.functions.invoke('reset-password', {
+        body: { target_user_id: resetPwTarget.id, new_password: data.new_password },
+      });
+      if (error) throw error;
+      toast.success(`รีเซ็ตรหัสผ่าน ${resetPwTarget.username} สำเร็จแล้ว`);
+      setResetPwTarget(null);
+      resetPwForm.reset();
+    } catch (err: unknown) {
+      toast.error(`ไม่สามารถรีเซ็ตรหัสผ่านได้: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    setSavingResetPw(false);
+  };
+
   const isCreateMode = !editUser;
   const warningType = warningForm.watch('warning_type');
 
@@ -526,6 +559,14 @@ export default function UsersPage() {
                         {!isSuperAdminUser && !isStoreOwnerUser && (
                           <Button variant="ghost" size="icon" className="w-8 h-8" title={t('common.edit')} onClick={() => openEdit(user)}>
                             <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                        {!isSuperAdminUser && !isStoreOwnerUser && (
+                          <Button variant="ghost" size="icon"
+                            className="w-8 h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-500/10"
+                            title="รีเซ็ตรหัสผ่าน"
+                            onClick={() => { setResetPwTarget(user); resetPwForm.reset(); }}>
+                            <KeyRound className="w-3.5 h-3.5" />
                           </Button>
                         )}
                         {user.id !== currentProfile?.id && !isSuperAdminUser && !isStoreOwnerUser && (
@@ -800,6 +841,57 @@ export default function UsersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ── Reset Password Dialog ───────────────────────────── */}
+      <Dialog open={!!resetPwTarget} onOpenChange={v => { if (!v) { setResetPwTarget(null); resetPwForm.reset(); } }}>
+        <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-blue-600" />
+              รีเซ็ตรหัสผ่าน
+            </DialogTitle>
+          </DialogHeader>
+          <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 px-4 py-3 text-sm text-blue-700 dark:text-blue-400 flex items-start gap-2">
+            <KeyRound className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>
+              ตั้งรหัสผ่านใหม่ให้ <strong>{resetPwTarget?.full_name || resetPwTarget?.username}</strong>
+              <span className="text-muted-foreground ml-1">(@{resetPwTarget?.username})</span>
+            </span>
+          </div>
+          <Form {...resetPwForm}>
+            <form onSubmit={resetPwForm.handleSubmit(onResetPassword)} className="space-y-4">
+              <FormField control={resetPwForm.control} name="new_password" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-normal">รหัสผ่านใหม่ *</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="password" placeholder="อย่างน้อย 8 ตัวอักษร" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={resetPwForm.control} name="confirm_password" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-normal">ยืนยันรหัสผ่าน *</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="password" placeholder="พิมพ์รหัสผ่านอีกครั้ง" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter className="gap-2">
+                <Button type="button" variant="outline" onClick={() => { setResetPwTarget(null); resetPwForm.reset(); }}>
+                  {t('common.cancel')}
+                </Button>
+                <Button type="submit" disabled={savingResetPw}
+                  className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <KeyRound className="w-4 h-4 mr-1.5" />
+                  {savingResetPw ? 'กำลังบันทึก...' : 'รีเซ็ตรหัสผ่าน'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

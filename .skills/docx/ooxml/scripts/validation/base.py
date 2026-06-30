@@ -104,13 +104,6 @@ class BaseSchemaValidator:
     }
 
     def __init__(self, unpacked_dir, original_file, verbose=False):
-        """Initialise the validator with paths and collect all XML/rels files.
-
-        Args:
-            unpacked_dir: Directory containing the extracted Office document files.
-            original_file: Original packed file used as a XSD-error baseline.
-            verbose: Whether to print passing-check messages.
-        """
         self.unpacked_dir = Path(unpacked_dir).resolve()
         self.original_file = Path(original_file)
         self.verbose = verbose
@@ -931,7 +924,6 @@ class BaseSchemaValidator:
         xml_copy = lxml.etree.fromstring(xml_string)
 
         def process_text_content(text, content_type):
-            """Strip {{template}} placeholders from a single text string and log warnings."""
             if not text:
                 return text
             matches = list(template_pattern.finditer(text))

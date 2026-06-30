@@ -14,7 +14,6 @@ from validation import DOCXSchemaValidator, PPTXSchemaValidator, RedliningValida
 
 
 def main():
-    """Parse CLI arguments, select the appropriate validators, and exit with validation status."""
     parser = argparse.ArgumentParser(description="Validate Office document XML files")
     parser.add_argument(
         "unpacked_dir",

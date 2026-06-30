@@ -141,7 +141,6 @@ class DocxXMLEditor(XMLEditor):
             return False
 
         def add_rsid_to_p(elem):
-            """Add w:rsidR, w:rsidRDefault, w:rsidP, w14:paraId, and w14:textId attributes to a <w:p> element."""
             if not elem.hasAttribute("w:rsidR"):
                 elem.setAttribute("w:rsidR", self.rsid)
             if not elem.hasAttribute("w:rsidRDefault"):
@@ -157,7 +156,6 @@ class DocxXMLEditor(XMLEditor):
                 elem.setAttribute("w14:textId", _generate_hex_id())
 
         def add_rsid_to_r(elem):
-            """Add w:rsidDel (inside <w:del>) or w:rsidR to a <w:r> element."""
             # Use w:rsidDel for <w:r> inside <w:del>, otherwise w:rsidR
             if is_inside_deletion(elem):
                 if not elem.hasAttribute("w:rsidDel"):
@@ -167,7 +165,6 @@ class DocxXMLEditor(XMLEditor):
                     elem.setAttribute("w:rsidR", self.rsid)
 
         def add_tracked_change_attrs(elem):
-            """Set w:id, w:author, w:date, and w16du:dateUtc on a tracked-change element (<w:ins>/<w:del>)."""
             # Auto-assign w:id if not present
             if not elem.hasAttribute("w:id"):
                 elem.setAttribute("w:id", str(self._get_next_change_id()))
@@ -183,7 +180,6 @@ class DocxXMLEditor(XMLEditor):
                 elem.setAttribute("w16du:dateUtc", timestamp)
 
         def add_comment_attrs(elem):
-            """Add w:author, w:date, and w:initials attributes to a comment element."""
             if not elem.hasAttribute("w:author"):
                 elem.setAttribute("w:author", self.author)
             if not elem.hasAttribute("w:date"):
@@ -192,14 +188,12 @@ class DocxXMLEditor(XMLEditor):
                 elem.setAttribute("w:initials", self.initials)
 
         def add_comment_extensible_date(elem):
-            """Add w16cex:dateUtc to a comment extensible element if not already present."""
             # Add w16cex:dateUtc for comment extensible elements
             if not elem.hasAttribute("w16cex:dateUtc"):
                 self._ensure_w16cex_namespace()
                 elem.setAttribute("w16cex:dateUtc", timestamp)
 
         def add_xml_space_to_t(elem):
-            """Add xml:space="preserve" to a <w:t> element when its text has leading or trailing whitespace."""
             # Add xml:space="preserve" to w:t if text has leading/trailing whitespace
             if (
                 elem.firstChild

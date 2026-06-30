@@ -59,6 +59,7 @@
    - Get session state from `supabase.auth.onAuthStateChange()` listener in a context provider
    - NEVER scatter auth redirect logic (`useEffect + router.replace`) across individual pages — converge all access control into the root layout
    - Public auth pages (`sign-in`, `sign-up`) live at root level; all post-login pages go under a protected `(app)/` group
+   - `app/index.tsx` is the unauthenticated landing page (inside `guard={!session}`). Do NOT replace it with `<Redirect>` to a protected route — the target is removed when not logged in, causing white screen. Design it as a welcome/onboarding screen that navigates to `/(auth)/sign-in` for login.
 4. When the app uses authentication, MUST provide a clearly accessible account management entry point from the main navigation (e.g. a "Profile"/"Me"/"Settings" tab in tab-based apps, or a user avatar/gear icon in the header for stack-based apps). This entry point MUST include at minimum: current user info display and a logout button. It MUST be reachable from any primary screen — placing logout only on transitional pages (like role-select or onboarding) does NOT satisfy this requirement.
 5. After successful login, use `router.replace('/')` (NOT `router.push`) so the auth screen is removed from back-stack
 6. If roles/admin needed:

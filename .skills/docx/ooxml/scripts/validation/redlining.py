@@ -12,13 +12,6 @@ class RedliningValidator:
     """Validator for tracked changes in Word documents."""
 
     def __init__(self, unpacked_dir, original_docx, verbose=False):
-        """Initialise the validator.
-
-        Args:
-            unpacked_dir: Directory containing the modified document XML files.
-            original_docx: Path to the original .docx file for comparison.
-            verbose: Whether to print passing-check messages.
-        """
         self.unpacked_dir = Path(unpacked_dir)
         self.original_docx = Path(original_docx)
         self.verbose = verbose

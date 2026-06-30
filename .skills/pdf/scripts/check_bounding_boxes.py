@@ -21,7 +21,6 @@ def get_bounding_box_messages(fields_json_stream) -> list[str]:
     messages.append(f"Read {len(fields['form_fields'])} fields")
 
     def rects_intersect(r1, r2):
-        """Return True if rectangle r1 and r2 overlap (sharing only an edge is not an overlap)."""
         disjoint_horizontal = r1[0] >= r2[2] or r1[2] <= r2[0]
         disjoint_vertical = r1[1] >= r2[3] or r1[3] <= r2[1]
         return not (disjoint_horizontal or disjoint_vertical)

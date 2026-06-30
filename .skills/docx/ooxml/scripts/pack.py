@@ -17,7 +17,6 @@ from pathlib import Path
 
 
 def main():
-    """Parse CLI arguments and pack the given directory into an Office file."""
     parser = argparse.ArgumentParser(description="Pack a directory into an Office file")
     parser.add_argument("input_directory", help="Unpacked Office document directory")
     parser.add_argument("output_file", help="Output Office file (.docx/.pptx/.xlsx)")
