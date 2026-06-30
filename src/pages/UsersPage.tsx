@@ -569,7 +569,7 @@ export default function UsersPage() {
                             <KeyRound className="w-3.5 h-3.5" />
                           </Button>
                         )}
-                        {user.id !== currentProfile?.id && !isSuperAdminUser && !isStoreOwnerUser && (
+                        {user.id !== currentProfile?.id && !isSuperAdminUser && !isStoreOwnerUser && currentProfile?.role === 'super_admin' && (
                           <Button variant="ghost" size="icon"
                             className="w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                             title={t('users.deactivateUser')}

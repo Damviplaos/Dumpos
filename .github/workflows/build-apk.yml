@@ -1,0 +1,94 @@
+name: 🤖 Build APK (TWA)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout code ──────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Setup Node.js ──────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Setup Java (required for Android build) ─────────────
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # ── 4. Install dependencies & build React app ─────────────
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Build React app (dist/)
+        run: npx vite build
+
+      # ── 5. Install Bubblewrap CLI ─────────────────────────────
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      # ── 6. Initialize Bubblewrap TWA project ─────────────────
+      - name: Initialize TWA project
+        run: |
+          mkdir -p twa-project
+          cd twa-project
+          bubblewrap init \
+            --manifest "https://dumpos-qm8m5z7kh-damviplaos-projects.vercel.app/manifest.json" \
+            --directory . \
+            --skipPwaValidation \
+            --chromeosonly false
+        env:
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: '1'
+
+      # ── 7. Build APK ─────────────────────────────────────────
+      - name: Build APK with Bubblewrap
+        run: |
+          cd twa-project
+          bubblewrap build --skipPwaValidation
+        env:
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: '1'
+
+      # ── 8. Upload APK as artifact ─────────────────────────────
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DumPOS-APK
+          path: twa-project/app-release-unsigned.apk
+          retention-days: 30
+
+      # ── 9. Create GitHub Release (on push to main) ────────────
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: "DumPOS APK v${{ github.run_number }}"
+          body: |
+            ## 📱 DumPOS APK — Auto Build
+
+            สร้างอัตโนมัติจาก commit: ${{ github.sha }}
+
+            ### วิธีติดตั้ง
+            1. ดาวน์โหลดไฟล์ `app-release-unsigned.apk`
+            2. เปิดการติดตั้งจากแหล่งที่ไม่รู้จักใน Android Settings
+            3. เปิดไฟล์ APK แล้วกดติดตั้ง
+
+            > ⚠️ เป็น unsigned APK — Android อาจแจ้งเตือนความปลอดภัย กดติดตั้งได้เลย
+          files: twa-project/app-release-unsigned.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

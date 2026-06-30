@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Eye, EyeOff, ShoppingCart, Lock, User, Zap } from 'lucide-react';
+import { Eye, EyeOff, ShoppingCart, Lock, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/db/supabase';
 import { Button } from '@/components/ui/button';
@@ -25,17 +25,12 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-// ข้อมูล demo สำหรับทดลองใช้งาน
-const DEMO_USERNAME = 'DUM';
-const DEMO_PASSWORD = 'Dum12345';
-
 export default function LoginPage() {
   const navigate = useNavigate();
   const { signInWithUsername } = useAuth();
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [storeName, setStoreName] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
@@ -68,17 +63,6 @@ export default function LoginPage() {
     setIsLoading(true);
     await doLogin(data.username, data.password, data.rememberMe ?? false);
     setIsLoading(false);
-  };
-
-  const handleDemoLogin = async () => {
-    // ทดลองใช้งานด้วยบัญชี demo — กดเดียวเข้าได้เลย
-    form.setValue('username', DEMO_USERNAME);
-    form.setValue('password', DEMO_PASSWORD);
-    form.setValue('agree', true);
-    form.setValue('rememberMe', false);
-    setIsDemoLoading(true);
-    await doLogin(DEMO_USERNAME, DEMO_PASSWORD, false);
-    setIsDemoLoading(false);
   };
 
   const doLogin = async (username: string, password: string, rememberMe: boolean) => {
@@ -279,31 +263,12 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-11 font-semibold"
-                disabled={isLoading || isDemoLoading}
+                disabled={isLoading}
               >
                 {isLoading ? t('login.loggingIn') : t('login.loginButton')}
               </Button>
             </form>
           </Form>
-
-          {/* ปุ่มทดลองใช้งาน — กดเดียวเข้าได้เลย */}
-          <div className="mt-3">
-            <div className="relative flex items-center gap-2 my-2">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground shrink-0">หรือ</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-10 text-sm gap-2"
-              onClick={handleDemoLogin}
-              disabled={isLoading || isDemoLoading}
-            >
-              <Zap className="w-4 h-4 text-primary" />
-              {isDemoLoading ? 'กำลังเข้าสู่ระบบ...' : 'ทดลองใช้งาน (คลิกเดียวเข้าได้เลย)'}
-            </Button>
-          </div>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
